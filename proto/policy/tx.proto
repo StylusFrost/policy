@@ -1,13 +1,39 @@
 syntax = "proto3";
 package StylusFrost.policy.policy;
 
+import "gogoproto/gogo.proto";
+import "policy/types.proto";
+
 // this line is used by starport scaffolding # proto/tx/import
 
 option go_package = "github.com/StylusFrost/policy/x/policy/types";
+option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the Msg service.
 service Msg {
-    // this line is used by starport scaffolding # proto/tx/rpc
+    // StoreRego to submit Rego code to the system
+  rpc StoreRego(MsgStoreRego) returns (MsgStoreRegoResponse);
 }
 
-// this line is used by starport scaffolding # proto/tx/message
+// MsgStoreRego submit Rego code to the system
+message MsgStoreRego {
+    // Sender is the that actor that signed the messages
+    string sender = 1;
+    // REGOByteCode can be raw or gzip compressed
+    bytes rego_byte_code = 2 [ (gogoproto.customname) = "REGOByteCode" ];
+    // Valid entry points json encoded 
+    bytes entry_points = 3 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+    // Source is a valid absolute HTTPS URI to the policy's source code,
+    // optional
+    string source = 4;
+    // InstantiatePermission access control to apply on policy creation,
+     // optional
+    AccessConfig instantiate_permission = 5;
+  }
+
+// MsgStoreCodeResponse returns store result data.
+message MsgStoreRegoResponse {
+    // RegoID is the reference to the stored REGO code
+    uint64 rego_id = 1 [ (gogoproto.customname) = "RegoID" ];
+  }
+  

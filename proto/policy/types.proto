@@ -1,0 +1,63 @@
+syntax = "proto3";
+package StylusFrost.policy.policy;
+import "gogoproto/gogo.proto";
+
+
+option go_package = "github.com/StylusFrost/policy/x/policy/types";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.equal_all) = true;
+
+
+// RegoInfo is data for the uploaded policy REGO code
+message RegoInfo {
+    // RegoHash is the unique identifier
+    bytes rego_hash = 1;
+    // Creator address who initially stored the code
+    string creator = 2;
+    // Source is a valid absolute HTTPS URI to the policy's source code,
+    // optional
+    string source = 3;
+    // Valid entry points when using the Rego code
+    repeated  string entryPoints = 4;
+    // InstantiateConfig access control to apply on policy creation, optional
+    AccessConfig instantiate_config = 5 [ (gogoproto.nullable) = false ];
+  }
+
+
+  // AccessType permission types
+enum AccessType {
+  option (gogoproto.goproto_enum_prefix) = false;
+  option (gogoproto.goproto_enum_stringer) = false;
+  // AccessTypeUnspecified placeholder for empty value
+  ACCESS_TYPE_UNSPECIFIED = 0
+      [ (gogoproto.enumvalue_customname) = "AccessTypeUnspecified" ];
+  // AccessTypeNobody forbidden
+  ACCESS_TYPE_NOBODY = 1
+      [ (gogoproto.enumvalue_customname) = "AccessTypeNobody" ];
+  // AccessTypeOnlyAddress restricted to an address
+  ACCESS_TYPE_ONLY_ADDRESS = 2
+      [ (gogoproto.enumvalue_customname) = "AccessTypeOnlyAddress" ];
+  // AccessTypeEverybody unrestricted
+  ACCESS_TYPE_EVERYBODY = 3
+      [ (gogoproto.enumvalue_customname) = "AccessTypeEverybody" ];
+}
+
+  // AccessConfig access control type.
+message AccessConfig {
+  option (gogoproto.goproto_stringer) = true;
+  AccessType permission = 1 [ (gogoproto.moretags) = "yaml:\"permission\"" ];
+  string address = 2 [ (gogoproto.moretags) = "yaml:\"address\"" ];
+}
+
+// Params defines the set of policy parameters.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  AccessConfig rego_upload_access = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.moretags) = "yaml:\"rego_upload_access\""
+  ];
+  AccessType instantiate_default_permission = 2
+      [ (gogoproto.moretags) = "yaml:\"instantiate_default_permission\"" ];
+  uint64 max_rego_code_size = 3
+      [ (gogoproto.moretags) = "yaml:\"max_rego_code_size\"" ];
+}

@@ -19274,6 +19274,188 @@ paths:
           format: uint64
       tags:
         - Query
+  /policy/rego:
+    get:
+      summary: Regos gets the metadata for all stored rego codes
+      operationId: StylusFrostPolicyPolicyRegos
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              regoInfos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    regoId:
+                      type: string
+                      format: uint64
+                    creator:
+                      type: string
+                    regoHash:
+                      type: string
+                      format: byte
+                    source:
+                      type: string
+                    entryPoints:
+                      type: array
+                      items:
+                        type: string
+                  title: RegoInfoResponse contains rego meta data from RegoInfo
+              pagination:
+                description: pagination defines the pagination in the response.
+                type: object
+                properties:
+                  nextKey:
+                    type: string
+                    format: byte
+                    title: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+            title: >-
+              QueryCodesResponse is the response type for the Query/Regos RPC
+              method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    typeUrl:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.countTotal
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
+  '/policy/rego/{regoId}':
+    get:
+      summary: Rego gets the binary code and metadata for a singe rego code
+      operationId: StylusFrostPolicyPolicyRego
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              regoInfo:
+                type: object
+                properties:
+                  regoId:
+                    type: string
+                    format: uint64
+                  creator:
+                    type: string
+                  regoHash:
+                    type: string
+                    format: byte
+                  source:
+                    type: string
+                  entryPoints:
+                    type: array
+                    items:
+                      type: string
+                title: RegoInfoResponse contains rego meta data from RegoInfo
+              data:
+                type: string
+                format: byte
+            title: >-
+              QueryRegoResponse is the response type for the Query/Rego RPC
+              method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    typeUrl:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: regoId
+          in: path
+          required: true
+          type: string
+          format: uint64
+      tags:
+        - Query
 definitions:
   cosmos.bank.v1beta1.DenomUnit:
     type: object
@@ -29488,3 +29670,132 @@ definitions:
     description: |-
       Version defines the versioning scheme used to negotiate the IBC verison in
       the connection handshake.
+  StylusFrost.policy.policy.AccessConfig:
+    type: object
+    properties:
+      permission:
+        type: string
+        enum:
+          - ACCESS_TYPE_UNSPECIFIED
+          - ACCESS_TYPE_NOBODY
+          - ACCESS_TYPE_ONLY_ADDRESS
+          - ACCESS_TYPE_EVERYBODY
+        default: ACCESS_TYPE_UNSPECIFIED
+        description: >-
+          - ACCESS_TYPE_UNSPECIFIED: AccessTypeUnspecified placeholder for empty
+          value
+           - ACCESS_TYPE_NOBODY: AccessTypeNobody forbidden
+           - ACCESS_TYPE_ONLY_ADDRESS: AccessTypeOnlyAddress restricted to an address
+           - ACCESS_TYPE_EVERYBODY: AccessTypeEverybody unrestricted
+        title: AccessType permission types
+      address:
+        type: string
+    description: AccessConfig access control type.
+  StylusFrost.policy.policy.AccessType:
+    type: string
+    enum:
+      - ACCESS_TYPE_UNSPECIFIED
+      - ACCESS_TYPE_NOBODY
+      - ACCESS_TYPE_ONLY_ADDRESS
+      - ACCESS_TYPE_EVERYBODY
+    default: ACCESS_TYPE_UNSPECIFIED
+    description: >-
+      - ACCESS_TYPE_UNSPECIFIED: AccessTypeUnspecified placeholder for empty
+      value
+       - ACCESS_TYPE_NOBODY: AccessTypeNobody forbidden
+       - ACCESS_TYPE_ONLY_ADDRESS: AccessTypeOnlyAddress restricted to an address
+       - ACCESS_TYPE_EVERYBODY: AccessTypeEverybody unrestricted
+    title: AccessType permission types
+  StylusFrost.policy.policy.MsgStoreRegoResponse:
+    type: object
+    properties:
+      regoId:
+        type: string
+        format: uint64
+        title: RegoID is the reference to the stored REGO code
+    description: MsgStoreCodeResponse returns store result data.
+  StylusFrost.policy.policy.QueryRegoResponse:
+    type: object
+    properties:
+      regoInfo:
+        type: object
+        properties:
+          regoId:
+            type: string
+            format: uint64
+          creator:
+            type: string
+          regoHash:
+            type: string
+            format: byte
+          source:
+            type: string
+          entryPoints:
+            type: array
+            items:
+              type: string
+        title: RegoInfoResponse contains rego meta data from RegoInfo
+      data:
+        type: string
+        format: byte
+    title: QueryRegoResponse is the response type for the Query/Rego RPC method
+  StylusFrost.policy.policy.QueryRegosResponse:
+    type: object
+    properties:
+      regoInfos:
+        type: array
+        items:
+          type: object
+          properties:
+            regoId:
+              type: string
+              format: uint64
+            creator:
+              type: string
+            regoHash:
+              type: string
+              format: byte
+            source:
+              type: string
+            entryPoints:
+              type: array
+              items:
+                type: string
+          title: RegoInfoResponse contains rego meta data from RegoInfo
+      pagination:
+        description: pagination defines the pagination in the response.
+        type: object
+        properties:
+          nextKey:
+            type: string
+            format: byte
+            title: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+    title: QueryCodesResponse is the response type for the Query/Regos RPC method
+  StylusFrost.policy.policy.RegoInfoResponse:
+    type: object
+    properties:
+      regoId:
+        type: string
+        format: uint64
+      creator:
+        type: string
+      regoHash:
+        type: string
+        format: byte
+      source:
+        type: string
+      entryPoints:
+        type: array
+        items:
+          type: string
+    title: RegoInfoResponse contains rego meta data from RegoInfo

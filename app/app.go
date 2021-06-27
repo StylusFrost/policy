@@ -84,6 +84,7 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	"github.com/StylusFrost/policy/x/policy"
 	policykeeper "github.com/StylusFrost/policy/x/policy/keeper"
@@ -329,8 +330,9 @@ func New(
 		appCodec,
 		keys[policytypes.StoreKey],
 		keys[policytypes.MemStoreKey],
+		app.getSubspace(policytypes.ModuleName),
 	)
-	policyModule := policy.NewAppModule(appCodec, app.PolicyKeeper)
+	policyModule := policy.NewAppModule(appCodec, &app.PolicyKeeper)
 
 	app.GovKeeper = govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
@@ -598,4 +600,12 @@ func initParamsKeeper(appCodec codec.BinaryMarshaler, legacyAmino *codec.LegacyA
 	paramsKeeper.Subspace(policytypes.ModuleName)
 
 	return paramsKeeper
+}
+
+// getSubspace returns a param subspace for a given module name.
+//
+// NOTE: This is solely to be used for testing purposes.
+func (app *App) getSubspace(moduleName string) paramstypes.Subspace {
+	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
+	return subspace
 }

@@ -1,15 +1,67 @@
 syntax = "proto3";
 package StylusFrost.policy.policy;
 
+import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
-// this line is used by starport scaffolding # 1
+import "policy/types.proto";
 
 option go_package = "github.com/StylusFrost/policy/x/policy/types";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.equal_all) = false;
 
 // Query defines the gRPC querier service.
 service Query {
-    // this line is used by starport scaffolding # 2
+// Rego gets the binary code and metadata for a singe rego code
+   rpc Rego(QueryRegoRequest) returns (QueryRegoResponse) {
+    option (google.api.http).get = "/policy/rego/{rego_id}";
+  }
+
+  // Regos gets the metadata for all stored rego codes
+  rpc Regos(QueryRegosRequest) returns (QueryRegosResponse) {
+    option (google.api.http).get = "/policy/rego";
+  }
+
 }
 
-// this line is used by starport scaffolding # 3
+  // QueryRegoRequest is the request type for the Query/Code RPC method
+  message QueryRegoRequest {
+    uint64 rego_id = 1; // grpc-gateway_out does not support Go style RegoID
+  }
+  
+  // QueryRegoResponse is the response type for the Query/Rego RPC method
+message QueryRegoResponse {
+    option (gogoproto.equal) = true;
+    RegoInfoResponse rego_info = 1
+        [ (gogoproto.embed) = true, (gogoproto.jsontag) = "" ];
+    bytes data = 2 [ (gogoproto.jsontag) = "data" ];
+  }
+
+// RegoInfoResponse contains rego meta data from RegoInfo
+message RegoInfoResponse {
+    option (gogoproto.equal) = true;
+    uint64 rego_id = 1 [
+      (gogoproto.customname) = "RegoID",
+      (gogoproto.jsontag) = "id"
+    ]; // id for legacy support
+    string creator = 2;
+    bytes rego_hash = 3
+        [ (gogoproto.casttype) =
+              "github.com/tendermint/tendermint/libs/bytes.HexBytes" ];
+    string source = 4;
+    repeated string  entryPoints = 5;
+    
+  }
+
+  // QueryRegosRequest is the request type for the Query/Codes RPC method
+message QueryRegosRequest {
+    // pagination defines an optional pagination for the request.
+    cosmos.base.query.v1beta1.PageRequest pagination = 1;
+  }
+  
+  // QueryCodesResponse is the response type for the Query/Regos RPC method
+  message QueryRegosResponse {
+    repeated RegoInfoResponse rego_infos = 1 [ (gogoproto.nullable) = false ];
+    // pagination defines the pagination in the response.
+    cosmos.base.query.v1beta1.PageResponse pagination = 2;
+  }
