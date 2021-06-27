@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	QueryGetRego = "rego"
+	QueryGetRego  = "rego"
+	QueryListRego = "list-rego"
 )
 
 // NewLegacyQuerier creates a new querier
@@ -30,6 +31,8 @@ func NewLegacyQuerier(keeper types.ViewKeeper, gasLimit sdk.Gas) sdk.Querier {
 				return nil, sdkerrors.Wrapf(types.ErrInvalid, "rego id: %s", err.Error())
 			}
 			rsp, err = queryRego(ctx, regoID, keeper)
+		case QueryListRego:
+			rsp, err = queryRegoList(ctx, keeper)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown data query endpoint")
 		}
@@ -45,4 +48,19 @@ func NewLegacyQuerier(keeper types.ViewKeeper, gasLimit sdk.Gas) sdk.Querier {
 		}
 		return bz, nil
 	}
+}
+
+func queryRegoList(ctx sdk.Context, k types.ViewKeeper) ([]types.RegoInfoResponse, error) {
+	var info []types.RegoInfoResponse
+	k.IterateRegoInfos(ctx, func(i uint64, res types.RegoInfo) bool {
+		info = append(info, types.RegoInfoResponse{
+			RegoID:      i,
+			Creator:     res.Creator,
+			RegoHash:    res.RegoHash,
+			Source:      res.Source,
+			EntryPoints: res.EntryPoints,
+		})
+		return false
+	})
+	return info, nil
 }

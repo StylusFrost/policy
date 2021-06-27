@@ -14,4 +14,5 @@ type PolicyOpsKeeper interface {
 type ViewKeeper interface {
 	GetRegoInfo(ctx types.Context, regoID uint64) *RegoInfo
 	GetByteRego(ctx types.Context, regoID uint64) ([]byte, error)
+	IterateRegoInfos(ctx types.Context, cb func(uint64, RegoInfo) bool)
 }
