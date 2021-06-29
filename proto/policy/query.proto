@@ -22,6 +22,19 @@ service Query {
     option (google.api.http).get = "/policy/rego";
   }
 
+    // PolicyInfo gets the policy meta data
+  rpc PolicyInfo(QueryPolicyInfoRequest)
+      returns (QueryPolicyInfoResponse) {
+    option (google.api.http).get = "/policy/policy/{address}";
+  }
+
+   // PoliciesByRegoCode lists all smart policies for a rego id
+  rpc PoliciesByRegoCode(QueryPoliciesByRegoCodeRequest)
+      returns (QueryPoliciesByRegoCodeResponse) {
+    option (google.api.http).get = "/policy/rego/{rego_id}/policies";
+  }
+
+
 }
 
   // QueryRegoRequest is the request type for the Query/Code RPC method
@@ -65,3 +78,42 @@ message QueryRegosRequest {
     // pagination defines the pagination in the response.
     cosmos.base.query.v1beta1.PageResponse pagination = 2;
   }
+
+  // QueryPolicyInfoRequest is the request type for the Query/PolicyInfo RPC
+// method
+message QueryPolicyInfoRequest {
+  // address is the address of the policy to query
+  string address = 1;
+}
+// QueryPolicyInfoResponse is the response type for the Query/PolicyInfo RPC
+// method
+message QueryPolicyInfoResponse {
+  option (gogoproto.equal) = true;
+
+  // address is the address of the policy
+  string address = 1;
+  PolicyInfo policy_info = 2 [
+    (gogoproto.embed) = true,
+    (gogoproto.nullable) = false,
+    (gogoproto.jsontag) = ""
+  ];
+}
+// QueryPoliciesByRegoCodeRequest is the request type for the Query/PoliciesByRegoCode
+// RPC method
+message QueryPoliciesByRegoCodeRequest {
+  uint64 rego_id = 1; // grpc-gateway_out does not support Go style RegoID
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+
+
+// QueryPoliciesByRegoCodeResponse is the response type for the
+// Query/PoliciesByRegoCode RPC method
+message QueryPoliciesByRegoCodeResponse {
+  // contracts are a set of policy addresses
+  repeated string policies = 1;
+
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

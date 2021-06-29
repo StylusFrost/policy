@@ -7,6 +7,8 @@ import (
 	context "context"
 	encoding_json "encoding/json"
 	fmt "fmt"
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
@@ -117,41 +119,310 @@ func (m *MsgStoreRegoResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgStoreRegoResponse proto.InternalMessageInfo
 
+// MsgInstantiatePolicy create a new smart policy instance for the given
+// rego id.
+type MsgInstantiatePolicy struct {
+	// Sender is the that actor that signed the messages
+	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	// Admin is an optional address that can execute migrations
+	Admin string `protobuf:"bytes,2,opt,name=admin,proto3" json:"admin,omitempty"`
+	// RegoID is the reference to the stored REGO code
+	RegoID uint64 `protobuf:"varint,3,opt,name=rego_id,json=regoId,proto3" json:"rego_id,omitempty"`
+	// Label is optional metadata to be stored with a policy instance.
+	Label string `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	// Valid entry points json encoded
+	EntryPoints encoding_json.RawMessage `protobuf:"bytes,5,opt,name=entry_points,json=entryPoints,proto3,casttype=encoding/json.RawMessage" json:"entry_points,omitempty"`
+	// Funds coins that are transferred to the policy on instantiation
+	Funds github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,6,rep,name=funds,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"funds"`
+}
+
+func (m *MsgInstantiatePolicy) Reset()         { *m = MsgInstantiatePolicy{} }
+func (m *MsgInstantiatePolicy) String() string { return proto.CompactTextString(m) }
+func (*MsgInstantiatePolicy) ProtoMessage()    {}
+func (*MsgInstantiatePolicy) Descriptor() ([]byte, []int) {
+	return fileDescriptor_45be95ea618c78f7, []int{2}
+}
+func (m *MsgInstantiatePolicy) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgInstantiatePolicy) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgInstantiatePolicy.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgInstantiatePolicy) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgInstantiatePolicy.Merge(m, src)
+}
+func (m *MsgInstantiatePolicy) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgInstantiatePolicy) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgInstantiatePolicy.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgInstantiatePolicy proto.InternalMessageInfo
+
+// MsgInstantiatePolicyResponse return instantiation result data
+type MsgInstantiatePolicyResponse struct {
+	// Address is the bech32 address of the new policy instance.
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *MsgInstantiatePolicyResponse) Reset()         { *m = MsgInstantiatePolicyResponse{} }
+func (m *MsgInstantiatePolicyResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgInstantiatePolicyResponse) ProtoMessage()    {}
+func (*MsgInstantiatePolicyResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_45be95ea618c78f7, []int{3}
+}
+func (m *MsgInstantiatePolicyResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgInstantiatePolicyResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgInstantiatePolicyResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgInstantiatePolicyResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgInstantiatePolicyResponse.Merge(m, src)
+}
+func (m *MsgInstantiatePolicyResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgInstantiatePolicyResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgInstantiatePolicyResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgInstantiatePolicyResponse proto.InternalMessageInfo
+
+// MsgUpdateAdmin sets a new admin for a smart policy
+type MsgUpdateAdmin struct {
+	// Sender is the that actor that signed the messages
+	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	// NewAdmin address to be set
+	NewAdmin string `protobuf:"bytes,2,opt,name=new_admin,json=newAdmin,proto3" json:"new_admin,omitempty"`
+	// Policy is the address of the smart policy
+	Policy string `protobuf:"bytes,3,opt,name=policy,proto3" json:"policy,omitempty"`
+}
+
+func (m *MsgUpdateAdmin) Reset()         { *m = MsgUpdateAdmin{} }
+func (m *MsgUpdateAdmin) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateAdmin) ProtoMessage()    {}
+func (*MsgUpdateAdmin) Descriptor() ([]byte, []int) {
+	return fileDescriptor_45be95ea618c78f7, []int{4}
+}
+func (m *MsgUpdateAdmin) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateAdmin) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateAdmin.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateAdmin) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateAdmin.Merge(m, src)
+}
+func (m *MsgUpdateAdmin) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateAdmin) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateAdmin.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateAdmin proto.InternalMessageInfo
+
+// MsgUpdateAdminResponse returns empty data
+type MsgUpdateAdminResponse struct {
+}
+
+func (m *MsgUpdateAdminResponse) Reset()         { *m = MsgUpdateAdminResponse{} }
+func (m *MsgUpdateAdminResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateAdminResponse) ProtoMessage()    {}
+func (*MsgUpdateAdminResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_45be95ea618c78f7, []int{5}
+}
+func (m *MsgUpdateAdminResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUpdateAdminResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUpdateAdminResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUpdateAdminResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateAdminResponse.Merge(m, src)
+}
+func (m *MsgUpdateAdminResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUpdateAdminResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateAdminResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUpdateAdminResponse proto.InternalMessageInfo
+
+// MsgClearAdmin removes any admin stored for a smart policy
+type MsgClearAdmin struct {
+	// Sender is the that actor that signed the messages
+	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	// Policy is the address of the smart policy
+	Policy string `protobuf:"bytes,3,opt,name=policy,proto3" json:"policy,omitempty"`
+}
+
+func (m *MsgClearAdmin) Reset()         { *m = MsgClearAdmin{} }
+func (m *MsgClearAdmin) String() string { return proto.CompactTextString(m) }
+func (*MsgClearAdmin) ProtoMessage()    {}
+func (*MsgClearAdmin) Descriptor() ([]byte, []int) {
+	return fileDescriptor_45be95ea618c78f7, []int{6}
+}
+func (m *MsgClearAdmin) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgClearAdmin) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgClearAdmin.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgClearAdmin) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgClearAdmin.Merge(m, src)
+}
+func (m *MsgClearAdmin) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgClearAdmin) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgClearAdmin.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgClearAdmin proto.InternalMessageInfo
+
+// MsgClearAdminResponse returns empty data
+type MsgClearAdminResponse struct {
+}
+
+func (m *MsgClearAdminResponse) Reset()         { *m = MsgClearAdminResponse{} }
+func (m *MsgClearAdminResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgClearAdminResponse) ProtoMessage()    {}
+func (*MsgClearAdminResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_45be95ea618c78f7, []int{7}
+}
+func (m *MsgClearAdminResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgClearAdminResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgClearAdminResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgClearAdminResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgClearAdminResponse.Merge(m, src)
+}
+func (m *MsgClearAdminResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgClearAdminResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgClearAdminResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgClearAdminResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgStoreRego)(nil), "StylusFrost.policy.policy.MsgStoreRego")
 	proto.RegisterType((*MsgStoreRegoResponse)(nil), "StylusFrost.policy.policy.MsgStoreRegoResponse")
+	proto.RegisterType((*MsgInstantiatePolicy)(nil), "StylusFrost.policy.policy.MsgInstantiatePolicy")
+	proto.RegisterType((*MsgInstantiatePolicyResponse)(nil), "StylusFrost.policy.policy.MsgInstantiatePolicyResponse")
+	proto.RegisterType((*MsgUpdateAdmin)(nil), "StylusFrost.policy.policy.MsgUpdateAdmin")
+	proto.RegisterType((*MsgUpdateAdminResponse)(nil), "StylusFrost.policy.policy.MsgUpdateAdminResponse")
+	proto.RegisterType((*MsgClearAdmin)(nil), "StylusFrost.policy.policy.MsgClearAdmin")
+	proto.RegisterType((*MsgClearAdminResponse)(nil), "StylusFrost.policy.policy.MsgClearAdminResponse")
 }
 
 func init() { proto.RegisterFile("policy/tx.proto", fileDescriptor_45be95ea618c78f7) }
 
 var fileDescriptor_45be95ea618c78f7 = []byte{
-	// 404 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0x4d, 0x6f, 0xd3, 0x40,
-	0x14, 0x8c, 0xdb, 0x62, 0xd4, 0xad, 0x05, 0x68, 0x55, 0x2a, 0x13, 0x21, 0x27, 0x2a, 0x07, 0x72,
-	0x40, 0xb6, 0x54, 0x24, 0x2e, 0x1c, 0x10, 0x2e, 0x1f, 0x2a, 0x52, 0x44, 0xb5, 0xbd, 0x71, 0xc0,
-	0x72, 0xec, 0xc7, 0xb2, 0x28, 0xdd, 0x67, 0xed, 0xdb, 0x88, 0xfa, 0x5f, 0x70, 0xe3, 0x2f, 0xf5,
-	0x98, 0x23, 0xa7, 0x08, 0x9c, 0x7f, 0xc1, 0x09, 0x79, 0xe3, 0x80, 0x2f, 0x20, 0x4e, 0xbb, 0x6f,
-	0xdf, 0xcc, 0xec, 0x68, 0x34, 0xec, 0x76, 0x85, 0x73, 0x55, 0xd4, 0x89, 0xbd, 0x8a, 0x2b, 0x83,
-	0x16, 0xf9, 0xbd, 0x0b, 0x5b, 0xcf, 0x17, 0xf4, 0xca, 0x20, 0xd9, 0x78, 0xb3, 0xec, 0x8e, 0xe1,
-	0xa1, 0x44, 0x89, 0x0e, 0x95, 0xb4, 0xb7, 0x0d, 0x61, 0xc8, 0xb7, 0x0a, 0x75, 0x05, 0xb4, 0x79,
-	0x3b, 0xfe, 0xba, 0xc3, 0x82, 0x29, 0xc9, 0x0b, 0x8b, 0x06, 0x04, 0x48, 0xe4, 0x47, 0xcc, 0x27,
-	0xd0, 0x25, 0x98, 0xd0, 0x1b, 0x7b, 0x93, 0x7d, 0xd1, 0x4d, 0xfc, 0x09, 0xbb, 0x65, 0x40, 0x62,
-	0x36, 0xab, 0x2d, 0x64, 0x05, 0x96, 0x10, 0xee, 0x8c, 0xbd, 0x49, 0x90, 0xde, 0x69, 0x56, 0xa3,
-	0x40, 0xbc, 0x7c, 0xfd, 0x36, 0xad, 0x2d, 0x9c, 0x62, 0x09, 0x22, 0x68, 0x71, 0xdb, 0x89, 0x3f,
-	0x63, 0x01, 0x68, 0x6b, 0xea, 0xac, 0x42, 0xa5, 0x2d, 0x85, 0xbb, 0x8e, 0x75, 0xff, 0xe7, 0x6a,
-	0x14, 0x82, 0x2e, 0xb0, 0x54, 0x5a, 0x26, 0x9f, 0x08, 0x75, 0x2c, 0xf2, 0xcf, 0x53, 0x20, 0xca,
-	0x25, 0x88, 0x03, 0xc7, 0x38, 0x77, 0x04, 0x67, 0x08, 0x17, 0xa6, 0x80, 0x70, 0xaf, 0x33, 0xe4,
-	0x26, 0xfe, 0x9e, 0x1d, 0x29, 0x4d, 0x36, 0xd7, 0x56, 0xe5, 0x16, 0xb2, 0x0a, 0xcc, 0xa5, 0x22,
-	0x52, 0xa8, 0xc3, 0x1b, 0x63, 0x6f, 0x72, 0x70, 0xf2, 0x30, 0xfe, 0x6b, 0x3e, 0xf1, 0xf3, 0xa2,
-	0x00, 0xa2, 0x53, 0xd4, 0x1f, 0x94, 0x14, 0x77, 0x7b, 0x32, 0xe7, 0xbf, 0x55, 0x8e, 0x9f, 0xb2,
-	0xc3, 0x7e, 0x30, 0x02, 0xa8, 0x42, 0x4d, 0xc0, 0x1f, 0xb0, 0x9b, 0x2e, 0x08, 0x55, 0xba, 0x84,
-	0xf6, 0x52, 0xd6, 0xac, 0x46, 0x7e, 0x0b, 0x39, 0x7b, 0x21, 0xfc, 0x76, 0x75, 0x56, 0x9e, 0xcc,
-	0xd9, 0xee, 0x94, 0x24, 0x07, 0xb6, 0xff, 0x27, 0xd9, 0x7f, 0x19, 0xea, 0xff, 0x34, 0x4c, 0xfe,
-	0x13, 0xb8, 0xb5, 0x94, 0xbe, 0xb9, 0xfe, 0x11, 0x0d, 0xae, 0x9b, 0xc8, 0x5b, 0x36, 0x91, 0xf7,
-	0xbd, 0x89, 0xbc, 0x2f, 0xeb, 0x68, 0xb0, 0x5c, 0x47, 0x83, 0x6f, 0xeb, 0x68, 0xf0, 0xee, 0x91,
-	0x54, 0xf6, 0xe3, 0x62, 0x16, 0x17, 0x78, 0x99, 0xf4, 0x84, 0x93, 0xae, 0x0d, 0x57, 0x49, 0xbf,
-	0x16, 0x33, 0xdf, 0xf5, 0xe2, 0xf1, 0xaf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x0d, 0x4f, 0xa2, 0x6e,
-	0x6f, 0x02, 0x00, 0x00,
+	// 667 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x94, 0xcf, 0x6e, 0xd3, 0x4c,
+	0x14, 0xc5, 0xe3, 0xa6, 0x49, 0xbf, 0x4c, 0xf2, 0x15, 0xb0, 0xda, 0xe2, 0x86, 0xca, 0x89, 0xcc,
+	0x82, 0x20, 0x81, 0xdd, 0x16, 0x09, 0x90, 0x58, 0x54, 0x4d, 0xf8, 0xa3, 0x22, 0x45, 0x54, 0xae,
+	0xd8, 0x20, 0x41, 0xe4, 0xd8, 0xb7, 0xee, 0xd0, 0x64, 0xc6, 0xf2, 0x9d, 0xd0, 0x66, 0xc1, 0x3b,
+	0xb0, 0xe3, 0x01, 0xd8, 0xf1, 0x18, 0xac, 0xba, 0xec, 0x92, 0x55, 0x80, 0xf4, 0x2d, 0x58, 0x21,
+	0x8f, 0x9d, 0xd4, 0x55, 0x49, 0x48, 0x57, 0xf6, 0xb5, 0xef, 0x39, 0x77, 0xf4, 0x9b, 0x33, 0x43,
+	0xae, 0x05, 0xbc, 0x43, 0xdd, 0xbe, 0x25, 0x8e, 0xcd, 0x20, 0xe4, 0x82, 0xab, 0xab, 0x7b, 0xa2,
+	0xdf, 0xe9, 0xe1, 0xf3, 0x90, 0xa3, 0x30, 0xe3, 0x9f, 0xc9, 0xa3, 0xac, 0xbb, 0x1c, 0xbb, 0x1c,
+	0xad, 0xb6, 0x83, 0x60, 0x7d, 0xd8, 0x68, 0x83, 0x70, 0x36, 0x2c, 0x97, 0x53, 0x16, 0x4b, 0xcb,
+	0x4b, 0x3e, 0xf7, 0xb9, 0x7c, 0xb5, 0xa2, 0xb7, 0xe4, 0xab, 0x3a, 0x9a, 0xd0, 0x0f, 0x00, 0xe3,
+	0x6f, 0xc6, 0xe7, 0x39, 0x52, 0x6a, 0xa2, 0xbf, 0x27, 0x78, 0x08, 0x36, 0xf8, 0x5c, 0x5d, 0x21,
+	0x79, 0x04, 0xe6, 0x41, 0xa8, 0x29, 0x55, 0xa5, 0x56, 0xb0, 0x93, 0x4a, 0x7d, 0x48, 0x16, 0x43,
+	0xf0, 0x79, 0xab, 0xdd, 0x17, 0xd0, 0x72, 0xb9, 0x07, 0xda, 0x5c, 0x55, 0xa9, 0x95, 0xea, 0xd7,
+	0x87, 0x83, 0x4a, 0xc9, 0x7e, 0xf6, 0xe2, 0x55, 0xbd, 0x2f, 0xa0, 0xc1, 0x3d, 0xb0, 0x4b, 0x51,
+	0xdf, 0xa8, 0x52, 0xb7, 0x48, 0x09, 0x98, 0x08, 0xfb, 0xad, 0x80, 0x53, 0x26, 0x50, 0xcb, 0x4a,
+	0xd5, 0xda, 0xef, 0x41, 0x45, 0x03, 0xe6, 0x72, 0x8f, 0x32, 0xdf, 0x7a, 0x8f, 0x9c, 0x99, 0xb6,
+	0x73, 0xd4, 0x04, 0x44, 0xc7, 0x07, 0xbb, 0x28, 0x15, 0xbb, 0x52, 0x20, 0x17, 0xc4, 0x7b, 0xa1,
+	0x0b, 0xda, 0x7c, 0xb2, 0x20, 0x59, 0xa9, 0xef, 0xc8, 0x0a, 0x65, 0x28, 0x1c, 0x26, 0xa8, 0x23,
+	0xa0, 0x15, 0x40, 0xd8, 0xa5, 0x88, 0x94, 0x33, 0x2d, 0x57, 0x55, 0x6a, 0xc5, 0xcd, 0x3b, 0xe6,
+	0x44, 0x7e, 0xe6, 0xb6, 0xeb, 0x02, 0x62, 0x83, 0xb3, 0x7d, 0xea, 0xdb, 0xcb, 0x29, 0x9b, 0xdd,
+	0xb1, 0x8b, 0xf1, 0x84, 0x2c, 0xa5, 0xc1, 0xd8, 0x80, 0x01, 0x67, 0x08, 0xea, 0x6d, 0xb2, 0x20,
+	0x41, 0x50, 0x4f, 0x12, 0x9a, 0xaf, 0x93, 0xe1, 0xa0, 0x92, 0x8f, 0x5a, 0x76, 0x9e, 0xda, 0xf9,
+	0xe8, 0xd7, 0x8e, 0x67, 0x7c, 0x99, 0x93, 0xea, 0x9d, 0x94, 0xb3, 0x9c, 0x3c, 0x11, 0xef, 0x12,
+	0xc9, 0x39, 0x5e, 0x97, 0x32, 0x49, 0xb5, 0x60, 0xc7, 0x45, 0x7a, 0x56, 0x76, 0xd2, 0xac, 0x48,
+	0xda, 0x71, 0xda, 0xd0, 0x49, 0xf8, 0xc4, 0xc5, 0x25, 0xee, 0xb9, 0xab, 0x72, 0x77, 0x48, 0x6e,
+	0xbf, 0xc7, 0x3c, 0xd4, 0xf2, 0xd5, 0x6c, 0xad, 0xb8, 0xb9, 0x6a, 0xc6, 0x99, 0x33, 0xa3, 0xcc,
+	0x99, 0x49, 0xe6, 0xcc, 0x06, 0xa7, 0xac, 0xbe, 0x7e, 0x32, 0xa8, 0x64, 0xbe, 0xfe, 0xa8, 0xd4,
+	0x7c, 0x2a, 0x0e, 0x7a, 0x6d, 0xd3, 0xe5, 0x5d, 0x2b, 0x09, 0x68, 0xfc, 0xb8, 0x8f, 0xde, 0x61,
+	0x92, 0xba, 0x48, 0x80, 0x76, 0xec, 0x6c, 0x3c, 0x26, 0x6b, 0x7f, 0x83, 0x34, 0x46, 0xad, 0x91,
+	0x05, 0xc7, 0xf3, 0x42, 0x40, 0x4c, 0x68, 0x8d, 0x4a, 0xe3, 0x2d, 0x59, 0x6c, 0xa2, 0xff, 0x3a,
+	0xf0, 0x1c, 0x01, 0xdb, 0x12, 0xd5, 0x24, 0xb0, 0xb7, 0x48, 0x81, 0xc1, 0x51, 0x2b, 0x0d, 0xf7,
+	0x3f, 0x06, 0x47, 0x63, 0x51, 0x9c, 0x08, 0x89, 0xb7, 0x60, 0x27, 0x95, 0xa1, 0x91, 0x95, 0x8b,
+	0xf6, 0xa3, 0x25, 0x19, 0x5b, 0xe4, 0xff, 0x26, 0xfa, 0x8d, 0x0e, 0x38, 0xe1, 0xf4, 0xb9, 0x93,
+	0xac, 0x6f, 0x92, 0xe5, 0x0b, 0x06, 0x23, 0xe7, 0xcd, 0x6f, 0x59, 0x92, 0x6d, 0xa2, 0xaf, 0x02,
+	0x29, 0x9c, 0x9f, 0xc6, 0x69, 0x21, 0x4e, 0xa7, 0xb3, 0x6c, 0xcd, 0xd8, 0x38, 0x66, 0xfb, 0x91,
+	0xdc, 0xb8, 0x9c, 0xce, 0x7f, 0xb8, 0x5c, 0x12, 0x94, 0x1f, 0x5d, 0x51, 0x30, 0x1e, 0x7f, 0x48,
+	0x8a, 0xe9, 0xdd, 0xbb, 0x3b, 0xdd, 0x27, 0xd5, 0x5a, 0xde, 0x98, 0xb9, 0x75, 0x3c, 0xec, 0x80,
+	0x90, 0xd4, 0x8e, 0xd5, 0xa6, 0x1b, 0x9c, 0x77, 0x96, 0xd7, 0x67, 0xed, 0x1c, 0x4d, 0xaa, 0xbf,
+	0x3c, 0xf9, 0xa5, 0x67, 0x4e, 0x86, 0xba, 0x72, 0x3a, 0xd4, 0x95, 0x9f, 0x43, 0x5d, 0xf9, 0x74,
+	0xa6, 0x67, 0x4e, 0xcf, 0xf4, 0xcc, 0xf7, 0x33, 0x3d, 0xf3, 0xe6, 0x5e, 0xea, 0x80, 0xa4, 0x9c,
+	0xad, 0xe4, 0x5e, 0x3e, 0xb6, 0xd2, 0x17, 0x74, 0x3b, 0x2f, 0x6f, 0xe8, 0x07, 0x7f, 0x02, 0x00,
+	0x00, 0xff, 0xff, 0x37, 0xc7, 0x66, 0xda, 0x19, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -168,6 +439,12 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// StoreRego to submit Rego code to the system
 	StoreRego(ctx context.Context, in *MsgStoreRego, opts ...grpc.CallOption) (*MsgStoreRegoResponse, error)
+	//  Instantiate creates a new smart policy instance for the given code id.
+	InstantiatePolicy(ctx context.Context, in *MsgInstantiatePolicy, opts ...grpc.CallOption) (*MsgInstantiatePolicyResponse, error)
+	// UpdateAdmin sets a new   admin for a smart policy
+	UpdateAdmin(ctx context.Context, in *MsgUpdateAdmin, opts ...grpc.CallOption) (*MsgUpdateAdminResponse, error)
+	// ClearAdmin removes any admin stored for a smart policy
+	ClearAdmin(ctx context.Context, in *MsgClearAdmin, opts ...grpc.CallOption) (*MsgClearAdminResponse, error)
 }
 
 type msgClient struct {
@@ -187,10 +464,43 @@ func (c *msgClient) StoreRego(ctx context.Context, in *MsgStoreRego, opts ...grp
 	return out, nil
 }
 
+func (c *msgClient) InstantiatePolicy(ctx context.Context, in *MsgInstantiatePolicy, opts ...grpc.CallOption) (*MsgInstantiatePolicyResponse, error) {
+	out := new(MsgInstantiatePolicyResponse)
+	err := c.cc.Invoke(ctx, "/StylusFrost.policy.policy.Msg/InstantiatePolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) UpdateAdmin(ctx context.Context, in *MsgUpdateAdmin, opts ...grpc.CallOption) (*MsgUpdateAdminResponse, error) {
+	out := new(MsgUpdateAdminResponse)
+	err := c.cc.Invoke(ctx, "/StylusFrost.policy.policy.Msg/UpdateAdmin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) ClearAdmin(ctx context.Context, in *MsgClearAdmin, opts ...grpc.CallOption) (*MsgClearAdminResponse, error) {
+	out := new(MsgClearAdminResponse)
+	err := c.cc.Invoke(ctx, "/StylusFrost.policy.policy.Msg/ClearAdmin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// StoreRego to submit Rego code to the system
 	StoreRego(context.Context, *MsgStoreRego) (*MsgStoreRegoResponse, error)
+	//  Instantiate creates a new smart policy instance for the given code id.
+	InstantiatePolicy(context.Context, *MsgInstantiatePolicy) (*MsgInstantiatePolicyResponse, error)
+	// UpdateAdmin sets a new   admin for a smart policy
+	UpdateAdmin(context.Context, *MsgUpdateAdmin) (*MsgUpdateAdminResponse, error)
+	// ClearAdmin removes any admin stored for a smart policy
+	ClearAdmin(context.Context, *MsgClearAdmin) (*MsgClearAdminResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -199,6 +509,15 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) StoreRego(ctx context.Context, req *MsgStoreRego) (*MsgStoreRegoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StoreRego not implemented")
+}
+func (*UnimplementedMsgServer) InstantiatePolicy(ctx context.Context, req *MsgInstantiatePolicy) (*MsgInstantiatePolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InstantiatePolicy not implemented")
+}
+func (*UnimplementedMsgServer) UpdateAdmin(ctx context.Context, req *MsgUpdateAdmin) (*MsgUpdateAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAdmin not implemented")
+}
+func (*UnimplementedMsgServer) ClearAdmin(ctx context.Context, req *MsgClearAdmin) (*MsgClearAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearAdmin not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -223,6 +542,60 @@ func _Msg_StoreRego_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_InstantiatePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgInstantiatePolicy)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).InstantiatePolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/StylusFrost.policy.policy.Msg/InstantiatePolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).InstantiatePolicy(ctx, req.(*MsgInstantiatePolicy))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_UpdateAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateAdmin)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UpdateAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/StylusFrost.policy.policy.Msg/UpdateAdmin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UpdateAdmin(ctx, req.(*MsgUpdateAdmin))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_ClearAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgClearAdmin)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ClearAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/StylusFrost.policy.policy.Msg/ClearAdmin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ClearAdmin(ctx, req.(*MsgClearAdmin))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "StylusFrost.policy.policy.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -230,6 +603,18 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StoreRego",
 			Handler:    _Msg_StoreRego_Handler,
+		},
+		{
+			MethodName: "InstantiatePolicy",
+			Handler:    _Msg_InstantiatePolicy_Handler,
+		},
+		{
+			MethodName: "UpdateAdmin",
+			Handler:    _Msg_UpdateAdmin_Handler,
+		},
+		{
+			MethodName: "ClearAdmin",
+			Handler:    _Msg_ClearAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -327,6 +712,233 @@ func (m *MsgStoreRegoResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgInstantiatePolicy) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgInstantiatePolicy) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgInstantiatePolicy) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Funds) > 0 {
+		for iNdEx := len(m.Funds) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Funds[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x32
+		}
+	}
+	if len(m.EntryPoints) > 0 {
+		i -= len(m.EntryPoints)
+		copy(dAtA[i:], m.EntryPoints)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.EntryPoints)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Label) > 0 {
+		i -= len(m.Label)
+		copy(dAtA[i:], m.Label)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Label)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.RegoID != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.RegoID))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Admin) > 0 {
+		i -= len(m.Admin)
+		copy(dAtA[i:], m.Admin)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Admin)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgInstantiatePolicyResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgInstantiatePolicyResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgInstantiatePolicyResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateAdmin) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateAdmin) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateAdmin) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Policy) > 0 {
+		i -= len(m.Policy)
+		copy(dAtA[i:], m.Policy)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Policy)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.NewAdmin) > 0 {
+		i -= len(m.NewAdmin)
+		copy(dAtA[i:], m.NewAdmin)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.NewAdmin)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUpdateAdminResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUpdateAdminResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUpdateAdminResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgClearAdmin) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgClearAdmin) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgClearAdmin) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Policy) > 0 {
+		i -= len(m.Policy)
+		copy(dAtA[i:], m.Policy)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Policy)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgClearAdminResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgClearAdminResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgClearAdminResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -376,6 +988,109 @@ func (m *MsgStoreRegoResponse) Size() (n int) {
 	if m.RegoID != 0 {
 		n += 1 + sovTx(uint64(m.RegoID))
 	}
+	return n
+}
+
+func (m *MsgInstantiatePolicy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Admin)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.RegoID != 0 {
+		n += 1 + sovTx(uint64(m.RegoID))
+	}
+	l = len(m.Label)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.EntryPoints)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if len(m.Funds) > 0 {
+		for _, e := range m.Funds {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgInstantiatePolicyResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgUpdateAdmin) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.NewAdmin)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Policy)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgUpdateAdminResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgClearAdmin) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Policy)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgClearAdminResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	return n
 }
 
@@ -651,6 +1366,681 @@ func (m *MsgStoreRegoResponse) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgInstantiatePolicy) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgInstantiatePolicy: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgInstantiatePolicy: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Admin", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Admin = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RegoID", wireType)
+			}
+			m.RegoID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RegoID |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Label", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Label = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EntryPoints", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EntryPoints = append(m.EntryPoints[:0], dAtA[iNdEx:postIndex]...)
+			if m.EntryPoints == nil {
+				m.EntryPoints = []byte{}
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Funds", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Funds = append(m.Funds, types.Coin{})
+			if err := m.Funds[len(m.Funds)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgInstantiatePolicyResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgInstantiatePolicyResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgInstantiatePolicyResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateAdmin) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateAdmin: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateAdmin: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NewAdmin", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NewAdmin = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Policy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Policy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUpdateAdminResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUpdateAdminResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUpdateAdminResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgClearAdmin) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgClearAdmin: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgClearAdmin: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Policy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Policy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgClearAdminResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgClearAdminResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgClearAdminResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

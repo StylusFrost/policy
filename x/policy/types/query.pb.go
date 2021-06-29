@@ -230,56 +230,235 @@ func (m *QueryRegosResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryRegosResponse proto.InternalMessageInfo
 
+// QueryPolicyInfoRequest is the request type for the Query/PolicyInfo RPC
+// method
+type QueryPolicyInfoRequest struct {
+	// address is the address of the policy to query
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *QueryPolicyInfoRequest) Reset()         { *m = QueryPolicyInfoRequest{} }
+func (m *QueryPolicyInfoRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryPolicyInfoRequest) ProtoMessage()    {}
+func (*QueryPolicyInfoRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a7e8b43f6e481a8b, []int{5}
+}
+func (m *QueryPolicyInfoRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryPolicyInfoRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryPolicyInfoRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryPolicyInfoRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryPolicyInfoRequest.Merge(m, src)
+}
+func (m *QueryPolicyInfoRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryPolicyInfoRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryPolicyInfoRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryPolicyInfoRequest proto.InternalMessageInfo
+
+// QueryPolicyInfoResponse is the response type for the Query/PolicyInfo RPC
+// method
+type QueryPolicyInfoResponse struct {
+	// address is the address of the policy
+	Address    string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	PolicyInfo `protobuf:"bytes,2,opt,name=policy_info,json=policyInfo,proto3,embedded=policy_info" json:""`
+}
+
+func (m *QueryPolicyInfoResponse) Reset()         { *m = QueryPolicyInfoResponse{} }
+func (m *QueryPolicyInfoResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryPolicyInfoResponse) ProtoMessage()    {}
+func (*QueryPolicyInfoResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a7e8b43f6e481a8b, []int{6}
+}
+func (m *QueryPolicyInfoResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryPolicyInfoResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryPolicyInfoResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryPolicyInfoResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryPolicyInfoResponse.Merge(m, src)
+}
+func (m *QueryPolicyInfoResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryPolicyInfoResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryPolicyInfoResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryPolicyInfoResponse proto.InternalMessageInfo
+
+// QueryPoliciesByRegoCodeRequest is the request type for the Query/PoliciesByRegoCode
+// RPC method
+type QueryPoliciesByRegoCodeRequest struct {
+	RegoId uint64 `protobuf:"varint,1,opt,name=rego_id,json=regoId,proto3" json:"rego_id,omitempty"`
+	// pagination defines an optional pagination for the request.
+	Pagination *query.PageRequest `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryPoliciesByRegoCodeRequest) Reset()         { *m = QueryPoliciesByRegoCodeRequest{} }
+func (m *QueryPoliciesByRegoCodeRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryPoliciesByRegoCodeRequest) ProtoMessage()    {}
+func (*QueryPoliciesByRegoCodeRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a7e8b43f6e481a8b, []int{7}
+}
+func (m *QueryPoliciesByRegoCodeRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryPoliciesByRegoCodeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryPoliciesByRegoCodeRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryPoliciesByRegoCodeRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryPoliciesByRegoCodeRequest.Merge(m, src)
+}
+func (m *QueryPoliciesByRegoCodeRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryPoliciesByRegoCodeRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryPoliciesByRegoCodeRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryPoliciesByRegoCodeRequest proto.InternalMessageInfo
+
+// QueryPoliciesByRegoCodeResponse is the response type for the
+// Query/PoliciesByRegoCode RPC method
+type QueryPoliciesByRegoCodeResponse struct {
+	// contracts are a set of policy addresses
+	Policies []string `protobuf:"bytes,1,rep,name=policies,proto3" json:"policies,omitempty"`
+	// pagination defines the pagination in the response.
+	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryPoliciesByRegoCodeResponse) Reset()         { *m = QueryPoliciesByRegoCodeResponse{} }
+func (m *QueryPoliciesByRegoCodeResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryPoliciesByRegoCodeResponse) ProtoMessage()    {}
+func (*QueryPoliciesByRegoCodeResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a7e8b43f6e481a8b, []int{8}
+}
+func (m *QueryPoliciesByRegoCodeResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryPoliciesByRegoCodeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryPoliciesByRegoCodeResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryPoliciesByRegoCodeResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryPoliciesByRegoCodeResponse.Merge(m, src)
+}
+func (m *QueryPoliciesByRegoCodeResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryPoliciesByRegoCodeResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryPoliciesByRegoCodeResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryPoliciesByRegoCodeResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*QueryRegoRequest)(nil), "StylusFrost.policy.policy.QueryRegoRequest")
 	proto.RegisterType((*QueryRegoResponse)(nil), "StylusFrost.policy.policy.QueryRegoResponse")
 	proto.RegisterType((*RegoInfoResponse)(nil), "StylusFrost.policy.policy.RegoInfoResponse")
 	proto.RegisterType((*QueryRegosRequest)(nil), "StylusFrost.policy.policy.QueryRegosRequest")
 	proto.RegisterType((*QueryRegosResponse)(nil), "StylusFrost.policy.policy.QueryRegosResponse")
+	proto.RegisterType((*QueryPolicyInfoRequest)(nil), "StylusFrost.policy.policy.QueryPolicyInfoRequest")
+	proto.RegisterType((*QueryPolicyInfoResponse)(nil), "StylusFrost.policy.policy.QueryPolicyInfoResponse")
+	proto.RegisterType((*QueryPoliciesByRegoCodeRequest)(nil), "StylusFrost.policy.policy.QueryPoliciesByRegoCodeRequest")
+	proto.RegisterType((*QueryPoliciesByRegoCodeResponse)(nil), "StylusFrost.policy.policy.QueryPoliciesByRegoCodeResponse")
 }
 
 func init() { proto.RegisterFile("policy/query.proto", fileDescriptor_a7e8b43f6e481a8b) }
 
 var fileDescriptor_a7e8b43f6e481a8b = []byte{
-	// 607 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0x31, 0x6f, 0xd3, 0x40,
-	0x14, 0xf6, 0xa5, 0x6e, 0x9a, 0x5c, 0x2b, 0x14, 0x4e, 0x55, 0x31, 0x51, 0x65, 0x47, 0x19, 0x20,
-	0xd0, 0xe2, 0x53, 0x0b, 0x03, 0x62, 0x8c, 0x50, 0x69, 0x17, 0x14, 0x8c, 0x58, 0x60, 0x40, 0xe7,
-	0xe4, 0xea, 0x58, 0x4a, 0x7c, 0xae, 0xef, 0x82, 0x6a, 0x10, 0x03, 0x2c, 0x0c, 0x2c, 0x48, 0xfc,
-	0x01, 0x46, 0x36, 0xfe, 0x46, 0xc6, 0x48, 0x2c, 0x4c, 0x16, 0x24, 0x0c, 0x28, 0x03, 0x3f, 0x80,
-	0x09, 0xf9, 0x7c, 0x2e, 0x26, 0x12, 0x10, 0x96, 0xe4, 0x5e, 0xee, 0xfb, 0xde, 0xfb, 0xde, 0x7b,
-	0x5f, 0x0e, 0xa2, 0x90, 0x0d, 0xfc, 0x6e, 0x8c, 0x4f, 0x46, 0x34, 0x8a, 0xed, 0x30, 0x62, 0x82,
-	0xa1, 0x8b, 0xf7, 0x45, 0x3c, 0x18, 0xf1, 0x83, 0x88, 0x71, 0x61, 0x67, 0xf7, 0xea, 0xab, 0xbe,
-	0xe9, 0x31, 0x8f, 0x49, 0x14, 0x4e, 0x4f, 0x19, 0xa1, 0xbe, 0xed, 0x31, 0xe6, 0x0d, 0x28, 0x26,
-	0xa1, 0x8f, 0x49, 0x10, 0x30, 0x41, 0x84, 0xcf, 0x02, 0xae, 0x6e, 0xaf, 0x76, 0x19, 0x1f, 0x32,
-	0x8e, 0x5d, 0xc2, 0x69, 0x56, 0x07, 0x3f, 0xd9, 0x73, 0xa9, 0x20, 0x7b, 0x38, 0x24, 0x9e, 0x1f,
-	0x48, 0xb0, 0xc2, 0xe6, 0x72, 0x44, 0x1c, 0x52, 0xc5, 0x6f, 0xee, 0xc0, 0xda, 0xbd, 0x94, 0xe5,
-	0x50, 0x8f, 0x39, 0xf4, 0x64, 0x44, 0xb9, 0x40, 0x17, 0xe0, 0x5a, 0x44, 0x3d, 0xf6, 0xd8, 0xef,
-	0x19, 0xa0, 0x01, 0x5a, 0xba, 0x53, 0x4e, 0xc3, 0xa3, 0x5e, 0xf3, 0x35, 0x80, 0xe7, 0x0b, 0x68,
-	0x1e, 0xb2, 0x80, 0x53, 0xe4, 0xc0, 0x6a, 0x06, 0x0f, 0x8e, 0x99, 0x24, 0xac, 0xef, 0xef, 0xd8,
-	0x7f, 0xec, 0xd2, 0x4e, 0xb9, 0x47, 0xc1, 0xf1, 0x19, 0xbf, 0x5d, 0x99, 0x24, 0x16, 0x98, 0x27,
-	0x96, 0xe6, 0x54, 0x22, 0x75, 0x87, 0xb6, 0xa1, 0xde, 0x23, 0x82, 0x18, 0xa5, 0x06, 0x68, 0x6d,
-	0xb4, 0x2b, 0xf3, 0xc4, 0x92, 0xb1, 0x23, 0x3f, 0x6f, 0xe9, 0xdf, 0xde, 0x59, 0xa0, 0xf9, 0x1d,
-	0xc0, 0xda, 0x62, 0x32, 0x74, 0x65, 0x41, 0x7b, 0xbb, 0x36, 0x4d, 0xac, 0xb2, 0x84, 0xdd, 0x9e,
-	0x27, 0x56, 0xc9, 0xef, 0xe5, 0xdd, 0x20, 0x03, 0xae, 0x75, 0x23, 0x4a, 0x04, 0x8b, 0x64, 0x99,
-	0xaa, 0x93, 0x87, 0xe8, 0x81, 0xea, 0xa8, 0x4f, 0x78, 0xdf, 0x58, 0x91, 0x12, 0x6e, 0xfe, 0x48,
-	0xac, 0x1b, 0x9e, 0x2f, 0xfa, 0x23, 0xd7, 0xee, 0xb2, 0x21, 0x16, 0x34, 0xe8, 0xd1, 0x68, 0xe8,
-	0x07, 0xa2, 0x78, 0x1c, 0xf8, 0x2e, 0xc7, 0x6e, 0x2c, 0x28, 0xb7, 0x0f, 0xe9, 0x69, 0x3b, 0x3d,
-	0x64, 0x4d, 0x1d, 0x12, 0xde, 0x47, 0x5b, 0xb0, 0xcc, 0xd9, 0x28, 0xea, 0x52, 0x43, 0x97, 0xf5,
-	0x54, 0x84, 0x1a, 0x70, 0x9d, 0x06, 0x22, 0x8a, 0x3b, 0xcc, 0x0f, 0x04, 0x37, 0x56, 0x1b, 0x2b,
-	0xad, 0xaa, 0x53, 0xfc, 0x49, 0x35, 0xfc, 0xa8, 0x30, 0x7d, 0x9e, 0x2f, 0xeb, 0x00, 0xc2, 0x5f,
-	0x8b, 0x56, 0xe3, 0xbf, 0x64, 0x67, 0xae, 0xb0, 0x53, 0x57, 0xd8, 0x99, 0xfb, 0x94, 0x2b, 0xec,
-	0x0e, 0xf1, 0xa8, 0xe2, 0x3a, 0x05, 0x66, 0xf3, 0x03, 0x80, 0xa8, 0x98, 0x5d, 0xcd, 0xb3, 0x03,
-	0xe1, 0xd9, 0x72, 0xb9, 0x01, 0x1a, 0x2b, 0xff, 0xbb, 0x5d, 0x7d, 0x9c, 0x6e, 0xb6, 0x9a, 0x6f,
-	0x96, 0xa3, 0x3b, 0xbf, 0x09, 0x2e, 0x49, 0xc1, 0x97, 0xff, 0x29, 0x38, 0xcb, 0x56, 0x54, 0xbc,
-	0xff, 0xaa, 0x04, 0x57, 0xa5, 0x62, 0xf4, 0x02, 0x40, 0x3d, 0x2d, 0x8c, 0xfe, 0xa6, 0x6c, 0xd1,
-	0xe6, 0xf5, 0xdd, 0xe5, 0xc0, 0x59, 0xe5, 0xa6, 0xf9, 0xf2, 0xe3, 0xd7, 0xb7, 0x25, 0x03, 0x6d,
-	0x61, 0xf5, 0x2f, 0x4a, 0x3b, 0xc2, 0xcf, 0x94, 0xd9, 0x9e, 0xa3, 0xa7, 0x70, 0x55, 0x4e, 0x0e,
-	0x2d, 0x95, 0x36, 0x5f, 0x5f, 0xfd, 0xda, 0x92, 0x68, 0xa5, 0x62, 0x53, 0xaa, 0x38, 0x87, 0x36,
-	0x8a, 0x2a, 0xda, 0x77, 0xc7, 0x5f, 0x4c, 0xed, 0xfd, 0xd4, 0xd4, 0xc6, 0x53, 0x13, 0x4c, 0xa6,
-	0x26, 0xf8, 0x3c, 0x35, 0xc1, 0x9b, 0x99, 0xa9, 0x4d, 0x66, 0xa6, 0xf6, 0x69, 0x66, 0x6a, 0x0f,
-	0x77, 0x0b, 0xd6, 0x2d, 0x14, 0xcc, 0xb3, 0x9c, 0xe2, 0xe2, 0xd3, 0xe0, 0x96, 0xe5, 0xdb, 0x70,
-	0xfd, 0x67, 0x00, 0x00, 0x00, 0xff, 0xff, 0x75, 0xc2, 0x28, 0x81, 0xc0, 0x04, 0x00, 0x00,
+	// 780 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0xbf, 0x6f, 0xd3, 0x40,
+	0x14, 0xce, 0xa5, 0x69, 0x9a, 0x5c, 0x2b, 0x54, 0x4e, 0x55, 0x6b, 0xac, 0xca, 0x0e, 0x91, 0xa0,
+	0x85, 0x16, 0x5b, 0x0d, 0x0c, 0xd0, 0x31, 0xa0, 0xd2, 0x2e, 0x28, 0x18, 0x58, 0x60, 0x40, 0x4e,
+	0x7c, 0x75, 0x2c, 0xa5, 0x3e, 0xd7, 0x77, 0x41, 0x0d, 0x55, 0x87, 0x32, 0xb0, 0x30, 0x80, 0x84,
+	0xd8, 0x19, 0xd9, 0x58, 0xf8, 0x23, 0x3a, 0x56, 0x42, 0x42, 0x4c, 0x11, 0xa4, 0x0c, 0xa8, 0x03,
+	0x7f, 0x00, 0x13, 0xf2, 0xdd, 0x39, 0x71, 0xd3, 0x5f, 0x69, 0xc5, 0x12, 0xfb, 0x72, 0xef, 0x7b,
+	0xef, 0x7b, 0xef, 0xfb, 0xee, 0x0c, 0x51, 0x40, 0x1a, 0x5e, 0xad, 0x65, 0xae, 0x37, 0x71, 0xd8,
+	0x32, 0x82, 0x90, 0x30, 0x82, 0x2e, 0x3d, 0x62, 0xad, 0x46, 0x93, 0x2e, 0x85, 0x84, 0x32, 0x43,
+	0xec, 0xcb, 0x87, 0x3a, 0xe1, 0x12, 0x97, 0xf0, 0x28, 0x33, 0x7a, 0x13, 0x00, 0x75, 0xda, 0x25,
+	0xc4, 0x6d, 0x60, 0xd3, 0x0e, 0x3c, 0xd3, 0xf6, 0x7d, 0xc2, 0x6c, 0xe6, 0x11, 0x9f, 0xca, 0xdd,
+	0xeb, 0x35, 0x42, 0xd7, 0x08, 0x35, 0xab, 0x36, 0xc5, 0xa2, 0x8e, 0xf9, 0x62, 0xa1, 0x8a, 0x99,
+	0xbd, 0x60, 0x06, 0xb6, 0xeb, 0xf9, 0x3c, 0x58, 0xc6, 0xc6, 0x74, 0x58, 0x2b, 0xc0, 0x12, 0x5f,
+	0x9c, 0x83, 0xe3, 0x0f, 0x23, 0x94, 0x85, 0x5d, 0x62, 0xe1, 0xf5, 0x26, 0xa6, 0x0c, 0x4d, 0xc1,
+	0x91, 0x10, 0xbb, 0xe4, 0xb9, 0xe7, 0x28, 0xa0, 0x00, 0x66, 0x33, 0x56, 0x36, 0x5a, 0xae, 0x38,
+	0xc5, 0x37, 0x00, 0x5e, 0x4c, 0x44, 0xd3, 0x80, 0xf8, 0x14, 0x23, 0x0b, 0xe6, 0x45, 0xb8, 0xbf,
+	0x4a, 0x38, 0x60, 0xb4, 0x34, 0x67, 0x1c, 0xdb, 0xa5, 0x11, 0x61, 0x57, 0xfc, 0xd5, 0x2e, 0xbe,
+	0x9c, 0xdb, 0x6d, 0xeb, 0x60, 0xbf, 0xad, 0xa7, 0xac, 0x5c, 0x28, 0xf7, 0xd0, 0x34, 0xcc, 0x38,
+	0x36, 0xb3, 0x95, 0x74, 0x01, 0xcc, 0x8e, 0x95, 0x73, 0xfb, 0x6d, 0x9d, 0xaf, 0x2d, 0xfe, 0xbb,
+	0x98, 0xf9, 0xfd, 0x51, 0x07, 0xc5, 0x3f, 0x00, 0x8e, 0xf7, 0x27, 0x43, 0xd7, 0xfa, 0xb8, 0x97,
+	0xc7, 0x3b, 0x6d, 0x3d, 0xcb, 0xc3, 0xee, 0xed, 0xb7, 0xf5, 0xb4, 0xe7, 0xc4, 0xdd, 0x20, 0x05,
+	0x8e, 0xd4, 0x42, 0x6c, 0x33, 0x12, 0xf2, 0x32, 0x79, 0x2b, 0x5e, 0xa2, 0x27, 0xb2, 0xa3, 0xba,
+	0x4d, 0xeb, 0xca, 0x10, 0xa7, 0x70, 0xfb, 0x6f, 0x5b, 0xbf, 0xe5, 0x7a, 0xac, 0xde, 0xac, 0x1a,
+	0x35, 0xb2, 0x66, 0x32, 0xec, 0x3b, 0x38, 0x5c, 0xf3, 0x7c, 0x96, 0x7c, 0x6d, 0x78, 0x55, 0x6a,
+	0x56, 0x5b, 0x0c, 0x53, 0x63, 0x19, 0x6f, 0x94, 0xa3, 0x17, 0xd1, 0xd4, 0xb2, 0x4d, 0xeb, 0x68,
+	0x12, 0x66, 0x29, 0x69, 0x86, 0x35, 0xac, 0x64, 0x78, 0x3d, 0xb9, 0x42, 0x05, 0x38, 0x8a, 0x7d,
+	0x16, 0xb6, 0x2a, 0xc4, 0xf3, 0x19, 0x55, 0x86, 0x0b, 0x43, 0xb3, 0x79, 0x2b, 0xf9, 0x97, 0x6c,
+	0xf8, 0x59, 0x62, 0xfa, 0x34, 0x16, 0x6b, 0x09, 0xc2, 0x9e, 0xd0, 0x72, 0xfc, 0x57, 0x0d, 0xe1,
+	0x0a, 0x23, 0x72, 0x85, 0x21, 0xdc, 0x27, 0x5d, 0x61, 0x54, 0x6c, 0x17, 0x4b, 0xac, 0x95, 0x40,
+	0x16, 0x3f, 0x03, 0x88, 0x92, 0xd9, 0xe5, 0x3c, 0x2b, 0x10, 0x76, 0xc5, 0xa5, 0x0a, 0x28, 0x0c,
+	0x9d, 0x55, 0xdd, 0xcc, 0x4e, 0xa4, 0x6c, 0x3e, 0x56, 0x96, 0xa2, 0xfb, 0x07, 0x08, 0xa7, 0x39,
+	0xe1, 0x99, 0x53, 0x09, 0x8b, 0x6c, 0x07, 0x18, 0x97, 0xe0, 0x24, 0x27, 0x5c, 0xe1, 0x95, 0x45,
+	0x51, 0x31, 0x13, 0x05, 0x8e, 0xd8, 0x8e, 0x13, 0x62, 0x4a, 0xf9, 0x40, 0xf2, 0x56, 0xbc, 0x2c,
+	0xbe, 0x05, 0x70, 0xea, 0x10, 0x48, 0xb6, 0x7a, 0x2c, 0x0a, 0x3d, 0x86, 0xa3, 0xa2, 0x3d, 0xe1,
+	0x71, 0xc1, 0xf9, 0xca, 0x09, 0x53, 0xe8, 0x65, 0x2f, 0x8f, 0x45, 0xfd, 0x77, 0x1d, 0x0e, 0x83,
+	0xee, 0x8e, 0x14, 0x75, 0x1b, 0x40, 0xad, 0xc7, 0xc8, 0xc3, 0xb4, 0xcc, 0x15, 0xb8, 0x4b, 0x1c,
+	0x7c, 0xda, 0x79, 0xec, 0xd3, 0x3e, 0x7d, 0x6e, 0xed, 0x5f, 0x03, 0xa8, 0x1f, 0xcb, 0x41, 0x4e,
+	0x47, 0x85, 0xb9, 0x40, 0xee, 0x72, 0x1b, 0xe4, 0xad, 0xee, 0xfa, 0xbf, 0x49, 0x5a, 0xfa, 0x96,
+	0x81, 0xc3, 0x9c, 0x08, 0xda, 0x06, 0x30, 0x13, 0x71, 0x40, 0x27, 0x99, 0xad, 0xff, 0xe6, 0x52,
+	0xe7, 0x07, 0x0b, 0x16, 0x95, 0x8b, 0xda, 0xab, 0xaf, 0xbf, 0xde, 0xa7, 0x15, 0x34, 0x69, 0xca,
+	0x8b, 0x31, 0x1a, 0xab, 0xb9, 0x29, 0x67, 0xbd, 0x85, 0x5e, 0xc2, 0x61, 0x7e, 0x18, 0xd0, 0x40,
+	0x69, 0xe3, 0x13, 0xa9, 0xde, 0x18, 0x30, 0x5a, 0xb2, 0x98, 0xe0, 0x2c, 0x2e, 0xa0, 0xb1, 0x24,
+	0x0b, 0xf4, 0x01, 0x40, 0xd8, 0x73, 0x11, 0x5a, 0x38, 0x2d, 0xe7, 0xa1, 0x43, 0xa0, 0x96, 0xce,
+	0x02, 0x91, 0x5c, 0x0a, 0x9c, 0x8b, 0x8a, 0x94, 0x98, 0x8b, 0x7c, 0x6c, 0xca, 0x93, 0xb0, 0x85,
+	0xbe, 0x00, 0x88, 0x0e, 0xbb, 0x04, 0xdd, 0x19, 0xa8, 0xd8, 0x51, 0xee, 0x56, 0x17, 0xcf, 0x03,
+	0x95, 0x7c, 0x67, 0x38, 0xdf, 0xcb, 0x48, 0x3f, 0x5a, 0x41, 0x33, 0x76, 0x68, 0xf9, 0xc1, 0xce,
+	0x4f, 0x2d, 0xf5, 0xa9, 0xa3, 0xa5, 0x76, 0x3a, 0x1a, 0xd8, 0xed, 0x68, 0xe0, 0x47, 0x47, 0x03,
+	0xef, 0xf6, 0xb4, 0xd4, 0xee, 0x9e, 0x96, 0xfa, 0xbe, 0xa7, 0xa5, 0x9e, 0xce, 0x27, 0x2e, 0xf7,
+	0x04, 0xa1, 0x38, 0xf1, 0x86, 0x99, 0xfc, 0x78, 0x56, 0xb3, 0xfc, 0xeb, 0x79, 0xf3, 0x5f, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x48, 0x41, 0x4d, 0xba, 0xe2, 0x07, 0x00, 0x00,
 }
 
 func (this *QueryRegoResponse) Equal(that interface{}) bool {
@@ -350,6 +529,33 @@ func (this *RegoInfoResponse) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *QueryPolicyInfoResponse) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*QueryPolicyInfoResponse)
+	if !ok {
+		that2, ok := that.(QueryPolicyInfoResponse)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Address != that1.Address {
+		return false
+	}
+	if !this.PolicyInfo.Equal(&that1.PolicyInfo) {
+		return false
+	}
+	return true
+}
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
@@ -367,6 +573,10 @@ type QueryClient interface {
 	Rego(ctx context.Context, in *QueryRegoRequest, opts ...grpc.CallOption) (*QueryRegoResponse, error)
 	// Regos gets the metadata for all stored rego codes
 	Regos(ctx context.Context, in *QueryRegosRequest, opts ...grpc.CallOption) (*QueryRegosResponse, error)
+	// PolicyInfo gets the policy meta data
+	PolicyInfo(ctx context.Context, in *QueryPolicyInfoRequest, opts ...grpc.CallOption) (*QueryPolicyInfoResponse, error)
+	// PoliciesByRegoCode lists all smart policies for a rego id
+	PoliciesByRegoCode(ctx context.Context, in *QueryPoliciesByRegoCodeRequest, opts ...grpc.CallOption) (*QueryPoliciesByRegoCodeResponse, error)
 }
 
 type queryClient struct {
@@ -395,12 +605,34 @@ func (c *queryClient) Regos(ctx context.Context, in *QueryRegosRequest, opts ...
 	return out, nil
 }
 
+func (c *queryClient) PolicyInfo(ctx context.Context, in *QueryPolicyInfoRequest, opts ...grpc.CallOption) (*QueryPolicyInfoResponse, error) {
+	out := new(QueryPolicyInfoResponse)
+	err := c.cc.Invoke(ctx, "/StylusFrost.policy.policy.Query/PolicyInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) PoliciesByRegoCode(ctx context.Context, in *QueryPoliciesByRegoCodeRequest, opts ...grpc.CallOption) (*QueryPoliciesByRegoCodeResponse, error) {
+	out := new(QueryPoliciesByRegoCodeResponse)
+	err := c.cc.Invoke(ctx, "/StylusFrost.policy.policy.Query/PoliciesByRegoCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Rego gets the binary code and metadata for a singe rego code
 	Rego(context.Context, *QueryRegoRequest) (*QueryRegoResponse, error)
 	// Regos gets the metadata for all stored rego codes
 	Regos(context.Context, *QueryRegosRequest) (*QueryRegosResponse, error)
+	// PolicyInfo gets the policy meta data
+	PolicyInfo(context.Context, *QueryPolicyInfoRequest) (*QueryPolicyInfoResponse, error)
+	// PoliciesByRegoCode lists all smart policies for a rego id
+	PoliciesByRegoCode(context.Context, *QueryPoliciesByRegoCodeRequest) (*QueryPoliciesByRegoCodeResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -412,6 +644,12 @@ func (*UnimplementedQueryServer) Rego(ctx context.Context, req *QueryRegoRequest
 }
 func (*UnimplementedQueryServer) Regos(ctx context.Context, req *QueryRegosRequest) (*QueryRegosResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Regos not implemented")
+}
+func (*UnimplementedQueryServer) PolicyInfo(ctx context.Context, req *QueryPolicyInfoRequest) (*QueryPolicyInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PolicyInfo not implemented")
+}
+func (*UnimplementedQueryServer) PoliciesByRegoCode(ctx context.Context, req *QueryPoliciesByRegoCodeRequest) (*QueryPoliciesByRegoCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PoliciesByRegoCode not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -454,6 +692,42 @@ func _Query_Regos_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_PolicyInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryPolicyInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).PolicyInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/StylusFrost.policy.policy.Query/PolicyInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).PolicyInfo(ctx, req.(*QueryPolicyInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_PoliciesByRegoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryPoliciesByRegoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).PoliciesByRegoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/StylusFrost.policy.policy.Query/PoliciesByRegoCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).PoliciesByRegoCode(ctx, req.(*QueryPoliciesByRegoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "StylusFrost.policy.policy.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -465,6 +739,14 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Regos",
 			Handler:    _Query_Regos_Handler,
+		},
+		{
+			MethodName: "PolicyInfo",
+			Handler:    _Query_PolicyInfo_Handler,
+		},
+		{
+			MethodName: "PoliciesByRegoCode",
+			Handler:    _Query_PoliciesByRegoCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -683,6 +965,160 @@ func (m *QueryRegosResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryPolicyInfoRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryPolicyInfoRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryPolicyInfoRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryPolicyInfoResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryPolicyInfoResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryPolicyInfoResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.PolicyInfo.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryPoliciesByRegoCodeRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryPoliciesByRegoCodeRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryPoliciesByRegoCodeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.RegoId != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.RegoId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryPoliciesByRegoCodeResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryPoliciesByRegoCodeResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryPoliciesByRegoCodeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Policies) > 0 {
+		for iNdEx := len(m.Policies) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Policies[iNdEx])
+			copy(dAtA[i:], m.Policies[iNdEx])
+			i = encodeVarintQuery(dAtA, i, uint64(len(m.Policies[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -775,6 +1211,69 @@ func (m *QueryRegosResponse) Size() (n int) {
 	if len(m.RegoInfos) > 0 {
 		for _, e := range m.RegoInfos {
 			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryPolicyInfoRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryPolicyInfoResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = m.PolicyInfo.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryPoliciesByRegoCodeRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RegoId != 0 {
+		n += 1 + sovQuery(uint64(m.RegoId))
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryPoliciesByRegoCodeResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Policies) > 0 {
+		for _, s := range m.Policies {
+			l = len(s)
 			n += 1 + l + sovQuery(uint64(l))
 		}
 	}
@@ -1327,6 +1826,426 @@ func (m *QueryRegosResponse) Unmarshal(dAtA []byte) error {
 			if err := m.RegoInfos[len(m.RegoInfos)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryPolicyInfoRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryPolicyInfoRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryPolicyInfoRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryPolicyInfoResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryPolicyInfoResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryPolicyInfoResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PolicyInfo", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.PolicyInfo.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryPoliciesByRegoCodeRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryPoliciesByRegoCodeRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryPoliciesByRegoCodeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RegoId", wireType)
+			}
+			m.RegoId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RegoId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryPoliciesByRegoCodeResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryPoliciesByRegoCodeResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryPoliciesByRegoCodeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Policies", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Policies = append(m.Policies, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {

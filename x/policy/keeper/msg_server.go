@@ -26,8 +26,7 @@ func (m msgServer) StoreRego(goCtx context.Context, msg *types.MsgStoreRego) (*t
 		return nil, sdkerrors.Wrap(err, "sender")
 	}
 
-	
-	regoID, err := m.keeper.Create(ctx, senderAddr, msg.REGOByteCode, msg.Source, msg.EntryPoints,msg.InstantiatePermission)
+	regoID, err := m.keeper.Create(ctx, senderAddr, msg.REGOByteCode, msg.Source, msg.EntryPoints, msg.InstantiatePermission)
 	if err != nil {
 		return nil, err
 	}
@@ -42,4 +41,90 @@ func (m msgServer) StoreRego(goCtx context.Context, msg *types.MsgStoreRego) (*t
 	return &types.MsgStoreRegoResponse{
 		RegoID: regoID,
 	}, nil
+}
+
+func (m msgServer) InstantiatePolicy(goCtx context.Context, msg *types.MsgInstantiatePolicy) (*types.MsgInstantiatePolicyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "sender")
+	}
+	var adminAddr sdk.AccAddress
+	if msg.Admin != "" {
+		if adminAddr, err = sdk.AccAddressFromBech32(msg.Admin); err != nil {
+			return nil, sdkerrors.Wrap(err, "admin")
+		}
+	}
+
+	policyAddr, err := m.keeper.Instantiate(ctx, msg.RegoID, senderAddr, adminAddr, msg.EntryPoints, msg.Label, msg.Funds)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
+		sdk.NewAttribute(types.AttributeKeyRegoID, fmt.Sprintf("%d", msg.RegoID)),
+		sdk.NewAttribute(types.AttributeKeyPolicyAddr, policyAddr.String()),
+	))
+
+	return &types.MsgInstantiatePolicyResponse{
+		Address: policyAddr.String(),
+	}, nil
+}
+
+func (m msgServer) UpdateAdmin(goCtx context.Context, msg *types.MsgUpdateAdmin) (*types.MsgUpdateAdminResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "sender")
+	}
+	policyAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "policy")
+	}
+	newAdminAddr, err := sdk.AccAddressFromBech32(msg.NewAdmin)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "new admin")
+	}
+
+	if err := m.keeper.UpdatePolicyAdmin(ctx, policyAddr, senderAddr, newAdminAddr); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
+		sdk.NewAttribute(types.AttributeKeyPolicy, msg.Policy),
+	))
+
+	return &types.MsgUpdateAdminResponse{}, nil
+}
+
+func (m msgServer) ClearAdmin(goCtx context.Context, msg *types.MsgClearAdmin) (*types.MsgClearAdminResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "sender")
+	}
+	policyAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "policy")
+	}
+
+	if err := m.keeper.ClearPolicyAdmin(ctx, policyAddr, senderAddr); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
+		sdk.NewAttribute(types.AttributeKeyPolicy, msg.Policy),
+	))
+
+	return &types.MsgClearAdminResponse{}, nil
 }

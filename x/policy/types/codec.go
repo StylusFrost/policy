@@ -13,6 +13,9 @@ import (
 // RegisterLegacyAminoRegoc registers the account types and interface
 func RegisterLegacyAminoRegoc(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgStoreRego{}, "policy/MsgStoreRego", nil)
+	cdc.RegisterConcrete(&MsgInstantiatePolicy{}, "policy/MsgInstantiatePolicy", nil)
+	cdc.RegisterConcrete(&MsgUpdateAdmin{}, "policy/MsgUpdateAdmin", nil)
+	cdc.RegisterConcrete(&MsgClearAdmin{}, "policy/MsgClearAdmin", nil)
 }
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
@@ -23,6 +26,9 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
 		&MsgStoreRego{},
+		&MsgInstantiatePolicy{},
+		&MsgUpdateAdmin{},
+		&MsgClearAdmin{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

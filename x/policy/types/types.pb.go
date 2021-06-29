@@ -5,6 +5,7 @@ package types
 
 import (
 	bytes "bytes"
+	encoding_json "encoding/json"
 	fmt "fmt"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
@@ -54,6 +55,42 @@ var AccessType_value = map[string]int32{
 
 func (AccessType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_86cb898d66c46951, []int{0}
+}
+
+// PolicyRegoHistoryOperationType actions that caused a rego change
+type PolicyRegoHistoryOperationType int32
+
+const (
+	// PolicyRegoHistoryOperationTypeUnspecified placeholder for empty value
+	PolicyRegoHistoryOperationTypeUnspecified PolicyRegoHistoryOperationType = 0
+	// PolicyRegoHistoryOperationTypeInit on chain policy instantiation
+	PolicyRegoHistoryOperationTypeInit PolicyRegoHistoryOperationType = 1
+	// PolicyRegoHistoryOperationTypeMigrate rego migration
+	PolicyRegoHistoryOperationTypeMigrate PolicyRegoHistoryOperationType = 2
+	// PolicyRegoHistoryOperationTypeGenesis based on genesis data
+	PolicyRegoHistoryOperationTypeGenesis PolicyRegoHistoryOperationType = 3
+)
+
+var PolicyRegoHistoryOperationType_name = map[int32]string{
+	0: "POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED",
+	1: "POLICY_REGO_HISTORY_OPERATION_TYPE_INIT",
+	2: "POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE",
+	3: "POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS",
+}
+
+var PolicyRegoHistoryOperationType_value = map[string]int32{
+	"POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED": 0,
+	"POLICY_REGO_HISTORY_OPERATION_TYPE_INIT":        1,
+	"POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE":     2,
+	"POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS":     3,
+}
+
+func (x PolicyRegoHistoryOperationType) String() string {
+	return proto.EnumName(PolicyRegoHistoryOperationType_name, int32(x))
+}
+
+func (PolicyRegoHistoryOperationType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_86cb898d66c46951, []int{1}
 }
 
 // RegoInfo is data for the uploaded policy REGO code
@@ -182,58 +219,222 @@ func (m *Params) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Params proto.InternalMessageInfo
 
+// AbsoluteTxPosition is a unique transaction position that allows for global
+// ordering of transactions.
+type AbsoluteTxPosition struct {
+	// BlockHeight is the block the policy was created at
+	BlockHeight uint64 `protobuf:"varint,1,opt,name=block_height,json=blockHeight,proto3" json:"block_height,omitempty"`
+	// TxIndex is a monotonic counter within the block (actual transaction index,
+	// or gas consumed)
+	TxIndex uint64 `protobuf:"varint,2,opt,name=tx_index,json=txIndex,proto3" json:"tx_index,omitempty"`
+}
+
+func (m *AbsoluteTxPosition) Reset()         { *m = AbsoluteTxPosition{} }
+func (m *AbsoluteTxPosition) String() string { return proto.CompactTextString(m) }
+func (*AbsoluteTxPosition) ProtoMessage()    {}
+func (*AbsoluteTxPosition) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86cb898d66c46951, []int{3}
+}
+func (m *AbsoluteTxPosition) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AbsoluteTxPosition) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AbsoluteTxPosition.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AbsoluteTxPosition) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AbsoluteTxPosition.Merge(m, src)
+}
+func (m *AbsoluteTxPosition) XXX_Size() int {
+	return m.Size()
+}
+func (m *AbsoluteTxPosition) XXX_DiscardUnknown() {
+	xxx_messageInfo_AbsoluteTxPosition.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AbsoluteTxPosition proto.InternalMessageInfo
+
+// PolicyInfo stores a REGO policy instance
+type PolicyInfo struct {
+	// RegoID is the reference to the stored Rego code
+	RegoID uint64 `protobuf:"varint,1,opt,name=rego_id,json=regoId,proto3" json:"rego_id,omitempty"`
+	// Creator address who initially instantiated the policy
+	Creator string `protobuf:"bytes,2,opt,name=creator,proto3" json:"creator,omitempty"`
+	// Admin is an optional address that can execute migrations
+	Admin string `protobuf:"bytes,3,opt,name=admin,proto3" json:"admin,omitempty"`
+	// Label is optional metadata to be stored with a policy instance.
+	Label string `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	// Created Tx position when the policy was instantiated.
+	// This data should kept internal and not be exposed via query results. Just
+	// use for sorting
+	Created *AbsoluteTxPosition `protobuf:"bytes,5,opt,name=created,proto3" json:"created,omitempty"`
+	// Valid entry points json encoded
+	EntryPoints encoding_json.RawMessage `protobuf:"bytes,6,opt,name=entry_points,json=entryPoints,proto3,casttype=encoding/json.RawMessage" json:"entry_points,omitempty"`
+}
+
+func (m *PolicyInfo) Reset()         { *m = PolicyInfo{} }
+func (m *PolicyInfo) String() string { return proto.CompactTextString(m) }
+func (*PolicyInfo) ProtoMessage()    {}
+func (*PolicyInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86cb898d66c46951, []int{4}
+}
+func (m *PolicyInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *PolicyInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_PolicyInfo.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *PolicyInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PolicyInfo.Merge(m, src)
+}
+func (m *PolicyInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *PolicyInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_PolicyInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PolicyInfo proto.InternalMessageInfo
+
+// PolicyRegoHistoryEntry metadata to a policy.
+type PolicyRegoHistoryEntry struct {
+	Operation PolicyRegoHistoryOperationType `protobuf:"varint,1,opt,name=operation,proto3,enum=StylusFrost.policy.policy.PolicyRegoHistoryOperationType" json:"operation,omitempty"`
+	// RegoID is the reference to the stored REGO code
+	RegoID uint64 `protobuf:"varint,2,opt,name=rego_id,json=regoId,proto3" json:"rego_id,omitempty"`
+	// Updated Tx position when the operation was executed.
+	Updated     *AbsoluteTxPosition      `protobuf:"bytes,3,opt,name=updated,proto3" json:"updated,omitempty"`
+	EntryPoints encoding_json.RawMessage `protobuf:"bytes,4,opt,name=entry_points,json=entryPoints,proto3,casttype=encoding/json.RawMessage" json:"entry_points,omitempty"`
+}
+
+func (m *PolicyRegoHistoryEntry) Reset()         { *m = PolicyRegoHistoryEntry{} }
+func (m *PolicyRegoHistoryEntry) String() string { return proto.CompactTextString(m) }
+func (*PolicyRegoHistoryEntry) ProtoMessage()    {}
+func (*PolicyRegoHistoryEntry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86cb898d66c46951, []int{5}
+}
+func (m *PolicyRegoHistoryEntry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *PolicyRegoHistoryEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_PolicyRegoHistoryEntry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *PolicyRegoHistoryEntry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PolicyRegoHistoryEntry.Merge(m, src)
+}
+func (m *PolicyRegoHistoryEntry) XXX_Size() int {
+	return m.Size()
+}
+func (m *PolicyRegoHistoryEntry) XXX_DiscardUnknown() {
+	xxx_messageInfo_PolicyRegoHistoryEntry.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PolicyRegoHistoryEntry proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterEnum("StylusFrost.policy.policy.AccessType", AccessType_name, AccessType_value)
+	proto.RegisterEnum("StylusFrost.policy.policy.PolicyRegoHistoryOperationType", PolicyRegoHistoryOperationType_name, PolicyRegoHistoryOperationType_value)
 	proto.RegisterType((*RegoInfo)(nil), "StylusFrost.policy.policy.RegoInfo")
 	proto.RegisterType((*AccessConfig)(nil), "StylusFrost.policy.policy.AccessConfig")
 	proto.RegisterType((*Params)(nil), "StylusFrost.policy.policy.Params")
+	proto.RegisterType((*AbsoluteTxPosition)(nil), "StylusFrost.policy.policy.AbsoluteTxPosition")
+	proto.RegisterType((*PolicyInfo)(nil), "StylusFrost.policy.policy.PolicyInfo")
+	proto.RegisterType((*PolicyRegoHistoryEntry)(nil), "StylusFrost.policy.policy.PolicyRegoHistoryEntry")
 }
 
 func init() { proto.RegisterFile("policy/types.proto", fileDescriptor_86cb898d66c46951) }
 
 var fileDescriptor_86cb898d66c46951 = []byte{
-	// 650 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x54, 0xcd, 0x6a, 0xdb, 0x4c,
-	0x14, 0xd5, 0x38, 0xfe, 0xf2, 0x33, 0x09, 0xf9, 0x9c, 0x69, 0xd2, 0x28, 0x6e, 0x2b, 0xab, 0x82,
-	0x50, 0xb7, 0x04, 0x1b, 0x52, 0x68, 0x21, 0x3b, 0xff, 0x28, 0x34, 0xa5, 0xd8, 0x46, 0x4a, 0x0a,
-	0x2e, 0x01, 0x31, 0x91, 0xc6, 0xb6, 0xc0, 0xd6, 0x08, 0x8d, 0x5c, 0xac, 0x3c, 0x41, 0xc9, 0xaa,
-	0xab, 0xd2, 0x4d, 0x20, 0xd0, 0x2e, 0xf2, 0x28, 0x59, 0x66, 0xd9, 0x6e, 0x4c, 0xeb, 0xac, 0xba,
-	0xe8, 0xc6, 0x4f, 0x50, 0x3c, 0x72, 0xd0, 0xd0, 0xd0, 0x96, 0xac, 0xa4, 0xb9, 0xf7, 0x9c, 0x7b,
-	0xe6, 0x9e, 0xb9, 0x5c, 0x88, 0x7c, 0xda, 0x75, 0xed, 0xa8, 0x18, 0x46, 0x3e, 0x61, 0x05, 0x3f,
-	0xa0, 0x21, 0x45, 0x1b, 0x66, 0x18, 0x75, 0xfb, 0x6c, 0x37, 0xa0, 0x2c, 0x2c, 0xc4, 0xf9, 0xe9,
-	0x27, 0xbb, 0xda, 0xa6, 0x6d, 0xca, 0x51, 0xc5, 0xc9, 0x5f, 0x4c, 0xd0, 0xbe, 0x02, 0x38, 0x6f,
-	0x90, 0x36, 0xdd, 0xf3, 0x5a, 0x14, 0xdd, 0x83, 0x0b, 0x01, 0x69, 0x53, 0xab, 0x83, 0x59, 0x47,
-	0x06, 0x2a, 0xc8, 0x2f, 0x19, 0xf3, 0x93, 0xc0, 0x0b, 0xcc, 0x3a, 0x48, 0x86, 0x73, 0x76, 0x40,
-	0x70, 0x48, 0x03, 0x39, 0xa5, 0x82, 0xfc, 0x82, 0x71, 0x7d, 0x44, 0x77, 0xe1, 0x2c, 0xa3, 0xfd,
-	0xc0, 0x26, 0xf2, 0x0c, 0x4f, 0x4c, 0x4f, 0x48, 0x85, 0x8b, 0xc4, 0x0b, 0x83, 0xa8, 0x41, 0x5d,
-	0x2f, 0x64, 0x72, 0x5a, 0x9d, 0xc9, 0x2f, 0x18, 0x62, 0x08, 0x1d, 0x42, 0xe4, 0x7a, 0x2c, 0xc4,
-	0x5e, 0xe8, 0xe2, 0x90, 0x58, 0x36, 0xf5, 0x5a, 0x6e, 0x5b, 0xfe, 0x4f, 0x05, 0xf9, 0xc5, 0xed,
-	0x47, 0x85, 0x3f, 0xf6, 0x52, 0x28, 0xd9, 0x36, 0x61, 0xac, 0xc2, 0xe1, 0xe5, 0xf4, 0xc5, 0x30,
-	0x27, 0x19, 0x2b, 0x42, 0xa1, 0x38, 0xa1, 0x9d, 0x01, 0xb8, 0x24, 0x22, 0xd1, 0x21, 0x84, 0x3e,
-	0x09, 0x7a, 0x2e, 0x63, 0x2e, 0xf5, 0x78, 0x83, 0xcb, 0xdb, 0x9b, 0xff, 0x94, 0xd9, 0x8f, 0x7c,
-	0x52, 0x5e, 0x1b, 0x0f, 0x73, 0x2b, 0x11, 0xee, 0x75, 0x77, 0xb4, 0xa4, 0x84, 0x66, 0x08, 0xf5,
-	0xd0, 0x16, 0x9c, 0xc3, 0x8e, 0x13, 0x10, 0xc6, 0x62, 0x83, 0xca, 0x68, 0x3c, 0xcc, 0x2d, 0xc7,
-	0x9c, 0x69, 0x42, 0x33, 0xae, 0x21, 0x3b, 0xe9, 0x8f, 0x67, 0x39, 0xa0, 0xfd, 0x4c, 0xc1, 0xd9,
-	0x06, 0x0e, 0x70, 0x8f, 0xa1, 0x01, 0x44, 0xdc, 0xfc, 0xbe, 0xdf, 0xa5, 0xd8, 0xb1, 0x30, 0xd7,
-	0xe6, 0x97, 0xbc, 0x85, 0x17, 0x0f, 0x27, 0x5e, 0x8c, 0x87, 0xb9, 0x8d, 0x58, 0xf6, 0x66, 0x41,
-	0xcd, 0xc8, 0x4c, 0x82, 0x07, 0x3c, 0x16, 0x53, 0xd1, 0x07, 0x00, 0x15, 0xf1, 0x19, 0x1c, 0xd2,
-	0xc2, 0xfd, 0x6e, 0x68, 0x09, 0x5e, 0xa5, 0x6e, 0xe3, 0xd5, 0xe3, 0xf1, 0x30, 0xb7, 0x19, 0x5f,
-	0xe0, 0xef, 0x65, 0x35, 0xe3, 0xbe, 0x00, 0xa8, 0xc6, 0xf9, 0x46, 0xe2, 0xe8, 0x4b, 0x88, 0x7a,
-	0x78, 0x60, 0xf1, 0x2e, 0x6c, 0xea, 0x10, 0x8b, 0xb9, 0xc7, 0xf1, 0x90, 0xa5, 0xcb, 0x0f, 0x92,
-	0x2e, 0x6f, 0x62, 0x34, 0xe3, 0xff, 0x1e, 0x1e, 0x4c, 0xe6, 0xba, 0x42, 0x1d, 0x62, 0xba, 0xc7,
-	0x84, 0xfb, 0x2d, 0x3d, 0xf9, 0x01, 0x20, 0x4c, 0x6e, 0x8a, 0x9e, 0xc1, 0xf5, 0x52, 0xa5, 0xa2,
-	0x9b, 0xa6, 0xb5, 0xdf, 0x6c, 0xe8, 0xd6, 0x41, 0xcd, 0x6c, 0xe8, 0x95, 0xbd, 0xdd, 0x3d, 0xbd,
-	0x9a, 0x91, 0xb2, 0x1b, 0x27, 0xa7, 0xea, 0x5a, 0x02, 0x3e, 0xf0, 0x98, 0x4f, 0x6c, 0xb7, 0xe5,
-	0x12, 0x07, 0x6d, 0x41, 0x24, 0xf2, 0x6a, 0xf5, 0x72, 0xbd, 0xda, 0xcc, 0x80, 0xec, 0xea, 0xc9,
-	0xa9, 0x9a, 0x49, 0x28, 0x35, 0x7a, 0x44, 0x9d, 0x08, 0x3d, 0x87, 0xb2, 0x88, 0xae, 0xd7, 0x5e,
-	0x35, 0xad, 0x52, 0xb5, 0x6a, 0xe8, 0xa6, 0x99, 0x49, 0xfd, 0x2e, 0x53, 0xf7, 0xba, 0x51, 0x29,
-	0x9e, 0x11, 0xb4, 0x0d, 0xd7, 0x44, 0xa2, 0xfe, 0x5a, 0x37, 0x9a, 0x5c, 0x69, 0x26, 0xbb, 0x7e,
-	0x72, 0xaa, 0xde, 0x49, 0x58, 0xfa, 0x5b, 0x12, 0x44, 0x13, 0xb1, 0xec, 0xfc, 0xbb, 0x4f, 0x8a,
-	0x74, 0xfe, 0x59, 0x91, 0xca, 0xb5, 0x8b, 0xef, 0x8a, 0x74, 0x3e, 0x52, 0xc0, 0xc5, 0x48, 0x01,
-	0x97, 0x23, 0x05, 0x7c, 0x1b, 0x29, 0xe0, 0xfd, 0x95, 0x22, 0x5d, 0x5e, 0x29, 0xd2, 0x97, 0x2b,
-	0x45, 0x7a, 0xb3, 0xd5, 0x76, 0xc3, 0x4e, 0xff, 0xa8, 0x60, 0xd3, 0x5e, 0x51, 0x78, 0xd9, 0xe2,
-	0x74, 0xb1, 0x0c, 0x8a, 0xe2, 0x86, 0x39, 0x9a, 0xe5, 0x1b, 0xe3, 0xe9, 0xaf, 0x00, 0x00, 0x00,
-	0xff, 0xff, 0x72, 0xbe, 0x10, 0xcd, 0x78, 0x04, 0x00, 0x00,
+	// 1009 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0x4f, 0x6f, 0x1b, 0xc5,
+	0x1b, 0xf6, 0xda, 0xae, 0x93, 0x4c, 0xa2, 0xfe, 0xdc, 0xf9, 0x25, 0xad, 0x63, 0xca, 0xda, 0x5d,
+	0x14, 0x9a, 0x44, 0xa9, 0x2d, 0x05, 0x09, 0x44, 0x2e, 0xc8, 0x7f, 0xb6, 0xce, 0xa2, 0xc6, 0xb6,
+	0x66, 0x1d, 0x90, 0x51, 0xa5, 0xd5, 0x78, 0x77, 0x62, 0x0f, 0xd8, 0x3b, 0xd6, 0xce, 0x18, 0xec,
+	0x7e, 0x01, 0x90, 0x4f, 0x1c, 0x10, 0xe2, 0x62, 0x29, 0x12, 0x1c, 0xfa, 0x51, 0x72, 0xec, 0x11,
+	0x2e, 0x16, 0x24, 0x17, 0x38, 0x70, 0xc9, 0x91, 0x13, 0xda, 0x59, 0x47, 0x5e, 0x08, 0x35, 0x09,
+	0x27, 0x7b, 0xde, 0xf7, 0x7d, 0x9e, 0x77, 0xde, 0x67, 0xe6, 0x59, 0x0d, 0x80, 0x7d, 0xd6, 0xa5,
+	0xf6, 0x28, 0x2f, 0x46, 0x7d, 0xc2, 0x73, 0x7d, 0x8f, 0x09, 0x06, 0x37, 0x4d, 0x31, 0xea, 0x0e,
+	0xf8, 0x53, 0x8f, 0x71, 0x91, 0x0b, 0xf2, 0xb3, 0x9f, 0xf4, 0x7a, 0x9b, 0xb5, 0x99, 0xac, 0xca,
+	0xfb, 0xff, 0x02, 0x80, 0xf6, 0x93, 0x02, 0x96, 0x11, 0x69, 0x33, 0xc3, 0x3d, 0x61, 0xf0, 0x0d,
+	0xb0, 0xe2, 0x91, 0x36, 0xb3, 0x3a, 0x98, 0x77, 0x52, 0x4a, 0x56, 0xd9, 0x5e, 0x43, 0xcb, 0x7e,
+	0xe0, 0x10, 0xf3, 0x0e, 0x4c, 0x81, 0x25, 0xdb, 0x23, 0x58, 0x30, 0x2f, 0x15, 0xcd, 0x2a, 0xdb,
+	0x2b, 0xe8, 0x6a, 0x09, 0xef, 0x83, 0x04, 0x67, 0x03, 0xcf, 0x26, 0xa9, 0x98, 0x4c, 0xcc, 0x56,
+	0x30, 0x0b, 0x56, 0x89, 0x2b, 0xbc, 0x51, 0x9d, 0x51, 0x57, 0xf0, 0x54, 0x3c, 0x1b, 0xdb, 0x5e,
+	0x41, 0xe1, 0x10, 0x7c, 0x0e, 0x20, 0x75, 0xb9, 0xc0, 0xae, 0xa0, 0x58, 0x10, 0xcb, 0x66, 0xee,
+	0x09, 0x6d, 0xa7, 0xee, 0x64, 0x95, 0xed, 0xd5, 0xfd, 0xc7, 0xb9, 0xd7, 0xce, 0x92, 0x2b, 0xd8,
+	0x36, 0xe1, 0xbc, 0x24, 0xcb, 0x8b, 0xf1, 0xb3, 0x69, 0x26, 0x82, 0xee, 0x85, 0x88, 0x82, 0x84,
+	0x76, 0xaa, 0x80, 0xb5, 0x70, 0x25, 0x7c, 0x0e, 0x40, 0x9f, 0x78, 0x3d, 0xca, 0x39, 0x65, 0xae,
+	0x1c, 0xf0, 0xee, 0xfe, 0xd6, 0xbf, 0xb6, 0x69, 0x8c, 0xfa, 0xa4, 0xb8, 0x71, 0x39, 0xcd, 0xdc,
+	0x1b, 0xe1, 0x5e, 0xf7, 0x40, 0x9b, 0x53, 0x68, 0x28, 0xc4, 0x07, 0xf7, 0xc0, 0x12, 0x76, 0x1c,
+	0x8f, 0x70, 0x1e, 0x08, 0x54, 0x84, 0x97, 0xd3, 0xcc, 0xdd, 0x00, 0x33, 0x4b, 0x68, 0xe8, 0xaa,
+	0xe4, 0x20, 0xfe, 0xdd, 0x69, 0x46, 0xd1, 0x7e, 0x8f, 0x82, 0x44, 0x1d, 0x7b, 0xb8, 0xc7, 0xe1,
+	0x10, 0x40, 0x29, 0xfe, 0xa0, 0xdf, 0x65, 0xd8, 0xb1, 0xb0, 0xec, 0x2d, 0x37, 0x79, 0x0b, 0x2d,
+	0x1e, 0xf9, 0x5a, 0x5c, 0x4e, 0x33, 0x9b, 0x41, 0xdb, 0xeb, 0x84, 0x1a, 0x4a, 0xfa, 0xc1, 0x63,
+	0x19, 0x0b, 0xa0, 0xf0, 0x5b, 0x05, 0xa8, 0xe1, 0x63, 0x70, 0xc8, 0x09, 0x1e, 0x74, 0x85, 0x15,
+	0xd2, 0x2a, 0x7a, 0x1b, 0xad, 0x76, 0x2e, 0xa7, 0x99, 0xad, 0x60, 0x03, 0x8b, 0x69, 0x35, 0xf4,
+	0x30, 0x54, 0x50, 0x0e, 0xf2, 0xf5, 0xb9, 0xa2, 0x1f, 0x02, 0xd8, 0xc3, 0x43, 0x4b, 0x4e, 0x61,
+	0x33, 0x87, 0x58, 0x9c, 0xbe, 0x08, 0x2e, 0x59, 0xbc, 0xf8, 0xe6, 0x7c, 0xca, 0xeb, 0x35, 0x1a,
+	0xfa, 0x5f, 0x0f, 0x0f, 0xfd, 0x7b, 0x5d, 0x62, 0x0e, 0x31, 0xe9, 0x0b, 0x22, 0xf5, 0x8e, 0x68,
+	0x08, 0xc0, 0x42, 0x8b, 0xb3, 0xee, 0x40, 0x90, 0xc6, 0xb0, 0xce, 0x38, 0x15, 0x7e, 0x9f, 0x47,
+	0x60, 0xad, 0xd5, 0x65, 0xf6, 0x67, 0x56, 0x87, 0xd0, 0x76, 0x47, 0x48, 0xd1, 0xe3, 0x68, 0x55,
+	0xc6, 0x0e, 0x65, 0x08, 0x6e, 0x82, 0x65, 0x31, 0xb4, 0xa8, 0xeb, 0x90, 0xa1, 0x14, 0x23, 0x8e,
+	0x96, 0xc4, 0xd0, 0xf0, 0x97, 0xda, 0x97, 0x51, 0x00, 0xea, 0x52, 0x04, 0x69, 0xa2, 0xb7, 0xc0,
+	0x92, 0xdc, 0x0c, 0x75, 0x02, 0x9e, 0x22, 0x38, 0x9f, 0x66, 0x12, 0xd2, 0x63, 0x65, 0x94, 0xf0,
+	0x53, 0x86, 0xb3, 0xc0, 0x4c, 0xeb, 0xe0, 0x0e, 0x76, 0x7a, 0xd4, 0x9d, 0x79, 0x29, 0x58, 0xf8,
+	0xd1, 0x2e, 0x6e, 0x91, 0x6e, 0x2a, 0x1e, 0x44, 0xe5, 0x02, 0x56, 0x66, 0x2c, 0xc4, 0x99, 0x79,
+	0xe6, 0xc9, 0xa2, 0x03, 0xba, 0x36, 0x37, 0xba, 0x42, 0xc3, 0x0f, 0xc0, 0x9a, 0xb4, 0xa5, 0xd5,
+	0x0f, 0xac, 0x9a, 0xf0, 0xbd, 0x5f, 0x7c, 0xf8, 0xc7, 0x34, 0x93, 0x22, 0xae, 0xcd, 0x1c, 0xea,
+	0xb6, 0xf3, 0x9f, 0x72, 0xe6, 0xe6, 0x10, 0xfe, 0xe2, 0x88, 0x70, 0x8e, 0xdb, 0xe4, 0x2f, 0x46,
+	0x3e, 0x88, 0xff, 0xea, 0xdf, 0xe6, 0xd3, 0x28, 0xb8, 0x1f, 0x28, 0xe1, 0x8f, 0x7b, 0x48, 0xb9,
+	0x60, 0xde, 0x48, 0xf7, 0xcb, 0xe0, 0xc7, 0x60, 0x85, 0xf5, 0x89, 0x87, 0xc5, 0xdc, 0x79, 0xef,
+	0x2f, 0xd8, 0xec, 0x35, 0x96, 0xda, 0x15, 0xd8, 0xbf, 0x61, 0x68, 0xce, 0x15, 0x96, 0x3b, 0xfa,
+	0x5a, 0xb9, 0x2b, 0x60, 0x69, 0xd0, 0x77, 0xa4, 0x50, 0xb1, 0xff, 0x24, 0xd4, 0x0c, 0x7d, 0x4d,
+	0xa8, 0xf8, 0x2d, 0x85, 0xda, 0xfd, 0x4d, 0x01, 0x60, 0x6e, 0x15, 0xf8, 0x2e, 0x78, 0x50, 0x28,
+	0x95, 0x74, 0xd3, 0xb4, 0x1a, 0xcd, 0xba, 0x6e, 0x1d, 0x57, 0xcd, 0xba, 0x5e, 0x32, 0x9e, 0x1a,
+	0x7a, 0x39, 0x19, 0x49, 0x6f, 0x8e, 0x27, 0xd9, 0x8d, 0x79, 0xf1, 0xb1, 0xcb, 0xfb, 0xc4, 0xa6,
+	0x27, 0x94, 0x38, 0x70, 0x0f, 0xc0, 0x30, 0xae, 0x5a, 0x2b, 0xd6, 0xca, 0xcd, 0xa4, 0x92, 0x5e,
+	0x1f, 0x4f, 0xb2, 0xc9, 0x39, 0xa4, 0xca, 0x5a, 0xcc, 0x19, 0xc1, 0xf7, 0x40, 0x2a, 0x5c, 0x5d,
+	0xab, 0x3e, 0x6b, 0x5a, 0x85, 0x72, 0x19, 0xe9, 0xa6, 0x99, 0x8c, 0xfe, 0xbd, 0x4d, 0xcd, 0xed,
+	0x8e, 0x0a, 0xc1, 0x47, 0x0a, 0xee, 0x83, 0x8d, 0x30, 0x50, 0xff, 0x48, 0x47, 0x4d, 0xd9, 0x29,
+	0x96, 0x7e, 0x30, 0x9e, 0x64, 0xff, 0x3f, 0x47, 0xe9, 0x9f, 0x13, 0x6f, 0xe4, 0x37, 0x4b, 0x2f,
+	0x7f, 0xf5, 0xbd, 0x1a, 0x79, 0xf9, 0x83, 0x1a, 0xd9, 0xfd, 0x26, 0x06, 0xd4, 0xc5, 0x07, 0x09,
+	0x31, 0xc8, 0xd5, 0x6b, 0xcf, 0x8c, 0x52, 0xd3, 0x42, 0x7a, 0xa5, 0x66, 0x1d, 0x1a, 0x66, 0xa3,
+	0x86, 0x9a, 0x56, 0xad, 0xae, 0xa3, 0x42, 0xc3, 0xa8, 0x55, 0xff, 0x49, 0x96, 0x27, 0xe3, 0x49,
+	0x76, 0x67, 0x31, 0x6f, 0x58, 0x2a, 0x13, 0x3c, 0xbe, 0x41, 0x0b, 0xa3, 0x6a, 0x34, 0x92, 0x4a,
+	0xfa, 0xed, 0xf1, 0x24, 0xab, 0x2d, 0xe6, 0x36, 0x5c, 0x2a, 0x60, 0x13, 0xec, 0xde, 0x80, 0xf4,
+	0xc8, 0xa8, 0xa0, 0x42, 0x43, 0x4f, 0x46, 0xd3, 0x3b, 0xe3, 0x49, 0x76, 0x6b, 0x31, 0xef, 0x11,
+	0x6d, 0x7b, 0x58, 0x90, 0x1b, 0x52, 0x57, 0xf4, 0xaa, 0x6e, 0x1a, 0x66, 0x32, 0x76, 0x13, 0xea,
+	0x0a, 0x71, 0x09, 0xa7, 0x3c, 0x1d, 0xf7, 0x8f, 0xa6, 0x58, 0x3d, 0xfb, 0x45, 0x8d, 0xbc, 0x3c,
+	0x57, 0x95, 0xb3, 0x73, 0x55, 0x79, 0x75, 0xae, 0x2a, 0x3f, 0x9f, 0xab, 0xca, 0xd7, 0x17, 0x6a,
+	0xe4, 0xd5, 0x85, 0x1a, 0xf9, 0xf1, 0x42, 0x8d, 0x7c, 0xb2, 0xd7, 0xa6, 0xa2, 0x33, 0x68, 0xe5,
+	0x6c, 0xd6, 0xcb, 0x87, 0x7c, 0x92, 0x9f, 0x3d, 0x38, 0x86, 0xf9, 0xf0, 0xcb, 0xa3, 0x95, 0x90,
+	0x2f, 0x89, 0x77, 0xfe, 0x0c, 0x00, 0x00, 0xff, 0xff, 0xd1, 0x91, 0xe8, 0x04, 0x90, 0x08, 0x00,
+	0x00,
 }
 
 func (this *RegoInfo) Equal(that interface{}) bool {
@@ -330,6 +531,105 @@ func (this *Params) Equal(that interface{}) bool {
 		return false
 	}
 	if this.MaxRegoCodeSize != that1.MaxRegoCodeSize {
+		return false
+	}
+	return true
+}
+func (this *AbsoluteTxPosition) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AbsoluteTxPosition)
+	if !ok {
+		that2, ok := that.(AbsoluteTxPosition)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.BlockHeight != that1.BlockHeight {
+		return false
+	}
+	if this.TxIndex != that1.TxIndex {
+		return false
+	}
+	return true
+}
+func (this *PolicyInfo) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*PolicyInfo)
+	if !ok {
+		that2, ok := that.(PolicyInfo)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.RegoID != that1.RegoID {
+		return false
+	}
+	if this.Creator != that1.Creator {
+		return false
+	}
+	if this.Admin != that1.Admin {
+		return false
+	}
+	if this.Label != that1.Label {
+		return false
+	}
+	if !this.Created.Equal(that1.Created) {
+		return false
+	}
+	if !bytes.Equal(this.EntryPoints, that1.EntryPoints) {
+		return false
+	}
+	return true
+}
+func (this *PolicyRegoHistoryEntry) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*PolicyRegoHistoryEntry)
+	if !ok {
+		that2, ok := that.(PolicyRegoHistoryEntry)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Operation != that1.Operation {
+		return false
+	}
+	if this.RegoID != that1.RegoID {
+		return false
+	}
+	if !this.Updated.Equal(that1.Updated) {
+		return false
+	}
+	if !bytes.Equal(this.EntryPoints, that1.EntryPoints) {
 		return false
 	}
 	return true
@@ -475,6 +775,159 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *AbsoluteTxPosition) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AbsoluteTxPosition) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AbsoluteTxPosition) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.TxIndex != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.TxIndex))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.BlockHeight != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.BlockHeight))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *PolicyInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PolicyInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *PolicyInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.EntryPoints) > 0 {
+		i -= len(m.EntryPoints)
+		copy(dAtA[i:], m.EntryPoints)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.EntryPoints)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if m.Created != nil {
+		{
+			size, err := m.Created.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Label) > 0 {
+		i -= len(m.Label)
+		copy(dAtA[i:], m.Label)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Label)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Admin) > 0 {
+		i -= len(m.Admin)
+		copy(dAtA[i:], m.Admin)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Admin)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Creator) > 0 {
+		i -= len(m.Creator)
+		copy(dAtA[i:], m.Creator)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Creator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.RegoID != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.RegoID))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *PolicyRegoHistoryEntry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *PolicyRegoHistoryEntry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *PolicyRegoHistoryEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.EntryPoints) > 0 {
+		i -= len(m.EntryPoints)
+		copy(dAtA[i:], m.EntryPoints)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.EntryPoints)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.Updated != nil {
+		{
+			size, err := m.Updated.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.RegoID != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.RegoID))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Operation != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Operation))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTypes(v)
 	base := offset
@@ -544,6 +997,76 @@ func (m *Params) Size() (n int) {
 	}
 	if m.MaxRegoCodeSize != 0 {
 		n += 1 + sovTypes(uint64(m.MaxRegoCodeSize))
+	}
+	return n
+}
+
+func (m *AbsoluteTxPosition) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.BlockHeight != 0 {
+		n += 1 + sovTypes(uint64(m.BlockHeight))
+	}
+	if m.TxIndex != 0 {
+		n += 1 + sovTypes(uint64(m.TxIndex))
+	}
+	return n
+}
+
+func (m *PolicyInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.RegoID != 0 {
+		n += 1 + sovTypes(uint64(m.RegoID))
+	}
+	l = len(m.Creator)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Admin)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Label)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Created != nil {
+		l = m.Created.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.EntryPoints)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
+func (m *PolicyRegoHistoryEntry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Operation != 0 {
+		n += 1 + sovTypes(uint64(m.Operation))
+	}
+	if m.RegoID != 0 {
+		n += 1 + sovTypes(uint64(m.RegoID))
+	}
+	if m.Updated != nil {
+		l = m.Updated.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.EntryPoints)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -968,6 +1491,487 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AbsoluteTxPosition) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AbsoluteTxPosition: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AbsoluteTxPosition: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BlockHeight", wireType)
+			}
+			m.BlockHeight = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.BlockHeight |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TxIndex", wireType)
+			}
+			m.TxIndex = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.TxIndex |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *PolicyInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: PolicyInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: PolicyInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RegoID", wireType)
+			}
+			m.RegoID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RegoID |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Creator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Admin", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Admin = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Label", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Label = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Created", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Created == nil {
+				m.Created = &AbsoluteTxPosition{}
+			}
+			if err := m.Created.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EntryPoints", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EntryPoints = append(m.EntryPoints[:0], dAtA[iNdEx:postIndex]...)
+			if m.EntryPoints == nil {
+				m.EntryPoints = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *PolicyRegoHistoryEntry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: PolicyRegoHistoryEntry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: PolicyRegoHistoryEntry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Operation", wireType)
+			}
+			m.Operation = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Operation |= PolicyRegoHistoryOperationType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RegoID", wireType)
+			}
+			m.RegoID = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RegoID |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Updated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Updated == nil {
+				m.Updated = &AbsoluteTxPosition{}
+			}
+			if err := m.Updated.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EntryPoints", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EntryPoints = append(m.EntryPoints[:0], dAtA[iNdEx:postIndex]...)
+			if m.EntryPoints == nil {
+				m.EntryPoints = []byte{}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])

@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	QueryGetRego  = "rego"
-	QueryListRego = "list-rego"
+	QueryListPolicytByRegoCode = "list-policies-by-rego"
+	QueryGetRego               = "rego"
+	QueryListRego              = "list-rego"
 )
 
 // NewLegacyQuerier creates a new querier
@@ -33,6 +34,12 @@ func NewLegacyQuerier(keeper types.ViewKeeper, gasLimit sdk.Gas) sdk.Querier {
 			rsp, err = queryRego(ctx, regoID, keeper)
 		case QueryListRego:
 			rsp, err = queryRegoList(ctx, keeper)
+		case QueryListPolicytByRegoCode:
+			regoID, err := strconv.ParseUint(path[1], 10, 64)
+			if err != nil {
+				return nil, sdkerrors.Wrapf(types.ErrInvalid, "rego id: %s", err.Error())
+			}
+			rsp = queryPolicyListByRegoCode(ctx, regoID, keeper)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown data query endpoint")
 		}
@@ -63,4 +70,13 @@ func queryRegoList(ctx sdk.Context, k types.ViewKeeper) ([]types.RegoInfoRespons
 		return false
 	})
 	return info, nil
+}
+
+func queryPolicyListByRegoCode(ctx sdk.Context, regoID uint64, keeper types.ViewKeeper) []string {
+	var policies []string
+	keeper.IteratePoliciesByRegoCode(ctx, regoID, func(addr sdk.AccAddress) bool {
+		policies = append(policies, addr.String())
+		return false
+	})
+	return policies
 }

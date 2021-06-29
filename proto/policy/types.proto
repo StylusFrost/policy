@@ -61,3 +61,66 @@ message Params {
   uint64 max_rego_code_size = 3
       [ (gogoproto.moretags) = "yaml:\"max_rego_code_size\"" ];
 }
+
+// AbsoluteTxPosition is a unique transaction position that allows for global
+// ordering of transactions.
+message AbsoluteTxPosition {
+  // BlockHeight is the block the policy was created at
+  uint64 block_height = 1;
+  // TxIndex is a monotonic counter within the block (actual transaction index,
+  // or gas consumed)
+  uint64 tx_index = 2;
+}
+
+// PolicyInfo stores a REGO policy instance
+message PolicyInfo {
+  option (gogoproto.equal) = true;
+
+  // RegoID is the reference to the stored Rego code
+  uint64 rego_id = 1 [ (gogoproto.customname) = "RegoID" ];
+  // Creator address who initially instantiated the policy
+  string creator = 2;
+  // Admin is an optional address that can execute migrations
+  string admin = 3;
+  // Label is optional metadata to be stored with a policy instance.
+  string label = 4;
+  // Created Tx position when the policy was instantiated.
+  // This data should kept internal and not be exposed via query results. Just
+  // use for sorting
+  AbsoluteTxPosition created = 5;
+  // Valid entry points json encoded 
+  bytes entry_points = 6 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+
+}
+
+
+// PolicyRegoHistoryOperationType actions that caused a rego change
+enum PolicyRegoHistoryOperationType {
+  option (gogoproto.goproto_enum_prefix) = false;
+  // PolicyRegoHistoryOperationTypeUnspecified placeholder for empty value
+  POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED = 0
+      [ (gogoproto.enumvalue_customname) =
+            "PolicyRegoHistoryOperationTypeUnspecified" ];
+  // PolicyRegoHistoryOperationTypeInit on chain policy instantiation
+  POLICY_REGO_HISTORY_OPERATION_TYPE_INIT = 1
+      [ (gogoproto.enumvalue_customname) =
+            "PolicyRegoHistoryOperationTypeInit" ];
+  // PolicyRegoHistoryOperationTypeMigrate rego migration
+  POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE = 2
+      [ (gogoproto.enumvalue_customname) =
+            "PolicyRegoHistoryOperationTypeMigrate" ];
+  // PolicyRegoHistoryOperationTypeGenesis based on genesis data
+  POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS = 3
+      [ (gogoproto.enumvalue_customname) =
+            "PolicyRegoHistoryOperationTypeGenesis" ];
+}
+
+// PolicyRegoHistoryEntry metadata to a policy.
+message PolicyRegoHistoryEntry {
+  PolicyRegoHistoryOperationType operation = 1;
+  // RegoID is the reference to the stored REGO code
+  uint64 rego_id = 2 [ (gogoproto.customname) = "RegoID" ];
+  // Updated Tx position when the operation was executed.
+  AbsoluteTxPosition updated = 3;
+  bytes entry_points = 4 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+}

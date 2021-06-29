@@ -5,7 +5,9 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"math"
 
+	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/StylusFrost/policy/x/policy/types"
@@ -20,12 +22,19 @@ import (
 // CompileCost is how much SDK gas we charge *per byte* for compiling REGO code.
 const CompileCost uint64 = 2
 
+type CoinTransferrer interface {
+	// TransferCoins sends the coin amounts from the source to the destination with rules applied.
+	TransferCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
+}
+
 type (
 	Keeper struct {
 		cdc           codec.Marshaler
 		storeKey      sdk.StoreKey
 		memKey        sdk.StoreKey
 		paramSpace    paramtypes.Subspace
+		accountKeeper types.AccountKeeper
+		bank          CoinTransferrer
 		queryGasLimit uint64
 	}
 )
@@ -35,6 +44,8 @@ func NewKeeper(
 	storeKey,
 	memKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
+	accountKeeper types.AccountKeeper,
+	bankKeeper types.BankKeeper,
 ) *Keeper {
 
 	if !paramSpace.HasKeyTable() {
@@ -46,6 +57,8 @@ func NewKeeper(
 		storeKey:      storeKey,
 		memKey:        memKey,
 		paramSpace:    paramSpace,
+		accountKeeper: accountKeeper,
+		bank:          NewBankCoinTransferrer(bankKeeper),
 		queryGasLimit: 10000000000, // TODO: Gas Limit
 	}
 }
@@ -229,4 +242,166 @@ func (k Keeper) IterateRegoInfos(ctx sdk.Context, cb func(uint64, types.RegoInfo
 			return
 		}
 	}
+}
+
+func (k Keeper) instantiate(ctx sdk.Context, regoID uint64, creator, admin sdk.AccAddress, entry_points []byte, label string, deposit sdk.Coins, authZ AuthorizationPolicy) (sdk.AccAddress, error) {
+
+	// create policy address
+	policyAddress := k.generatePolicyAddress(ctx, regoID)
+	existingAcct := k.accountKeeper.GetAccount(ctx, policyAddress)
+	if existingAcct != nil {
+		return nil, sdkerrors.Wrap(types.ErrAccountExists, existingAcct.GetAddress().String())
+	}
+
+	// deposit initial policy funds
+	if !deposit.IsZero() {
+		if err := k.bank.TransferCoins(ctx, creator, policyAddress, deposit); err != nil {
+			return nil, err
+		}
+
+	} else {
+		// create an empty account (so we don't have issues later)
+		// TODO: can we remove this?
+		policyAccount := k.accountKeeper.NewAccountWithAddress(ctx, policyAddress)
+		k.accountKeeper.SetAccount(ctx, policyAccount)
+	}
+
+	// get rego info
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(types.GetRegoKey(regoID))
+	if bz == nil {
+		return nil, sdkerrors.Wrap(types.ErrNotFound, "rego")
+	}
+	var regoInfo types.RegoInfo
+	k.cdc.MustUnmarshalBinaryBare(bz, &regoInfo)
+
+	if !authZ.CanInstantiatePolicy(regoInfo.InstantiateConfig, creator) {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not instantiate")
+	}
+
+	//TODO: verify entry_points vs codeInfo.EntryPoints
+
+	// TODO: GAS CONSUME
+
+	// persist instance first
+	createdAt := types.NewAbsoluteTxPosition(ctx)
+	policyInfo := types.NewPolicyInfo(regoID, creator, admin, label, createdAt, entry_points)
+
+	// store policy before dispatch so that policy could be called back
+	historyEntry := policyInfo.InitialHistory(entry_points)
+	k.addToPolicyRegoSecondaryIndex(ctx, policyAddress, historyEntry)
+	k.appendToPolicyHistory(ctx, policyAddress, historyEntry)
+	k.storePolicyInfo(ctx, policyAddress, &policyInfo)
+
+	return policyAddress, nil
+}
+
+func (k Keeper) generatePolicyAddress(ctx sdk.Context, regoID uint64) sdk.AccAddress {
+	instanceID := k.autoIncrementID(ctx, types.KeyLastInstanceID)
+	return BuildPolicyAddress(regoID, instanceID)
+}
+
+func BuildPolicyAddress(regoID, instanceID uint64) sdk.AccAddress {
+	if regoID > math.MaxUint32 || instanceID > math.MaxUint32 {
+		// NOTE: It is possible to get a duplicate address if either regoID or instanceID
+		// overflow 32 bits. This is highly improbable, but something that could be refactored.
+		panic(fmt.Sprintf("address uint32 reached: regoID: %d, instanceID: %d", regoID, instanceID))
+	}
+	policyID := regoID<<32 + instanceID
+	return addrFromUint64(policyID)
+}
+func addrFromUint64(id uint64) sdk.AccAddress {
+	addr := make([]byte, 20)
+	addr[0] = 'C'
+	binary.PutUvarint(addr[1:], id)
+	return sdk.AccAddress(crypto.AddressHash(addr))
+}
+
+// BankCoinTransferrer replicates the cosmos-sdk behaviour as in
+// https://github.com/cosmos/cosmos-sdk/blob/v0.41.4/x/bank/keeper/msg_server.go#L26
+type BankCoinTransferrer struct {
+	keeper types.BankKeeper
+}
+
+func NewBankCoinTransferrer(keeper types.BankKeeper) BankCoinTransferrer {
+	return BankCoinTransferrer{
+		keeper: keeper,
+	}
+}
+
+// TransferCoins transfers coins from source to destination account when coin send was enabled for them and the recipient
+// is not in the blocked address list.
+func (c BankCoinTransferrer) TransferCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error {
+	if err := c.keeper.SendEnabledCoins(ctx, amt...); err != nil {
+		return err
+	}
+	if c.keeper.BlockedAddr(fromAddr) {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "blocked address can not be used")
+	}
+	sdkerr := c.keeper.SendCoins(ctx, fromAddr, toAddr, amt)
+	if sdkerr != nil {
+		return sdkerr
+	}
+	return nil
+}
+
+func (k Keeper) addToPolicyRegoSecondaryIndex(ctx sdk.Context, policyAddress sdk.AccAddress, entry types.PolicyRegoHistoryEntry) {
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.GetPolicyByCreatedSecondaryIndexKey(policyAddress, entry), []byte{})
+}
+
+func (k Keeper) appendToPolicyHistory(ctx sdk.Context, policyAddr sdk.AccAddress, newEntries ...types.PolicyRegoHistoryEntry) {
+	store := ctx.KVStore(k.storeKey)
+	// find last element position
+	var pos uint64
+	prefixStore := prefix.NewStore(store, types.GetPolicyRegoHistoryElementPrefix(policyAddr))
+	if iter := prefixStore.ReverseIterator(nil, nil); iter.Valid() {
+		pos = sdk.BigEndianToUint64(iter.Value())
+	}
+	// then store with incrementing position
+	for _, e := range newEntries {
+		pos++
+		key := types.GetPolicyRegoHistoryElementKey(policyAddr, pos)
+		store.Set(key, k.cdc.MustMarshalBinaryBare(&e))
+	}
+}
+
+// storePolicyInfo persists the PolicyInfo. No secondary index updated here.
+func (k Keeper) storePolicyInfo(ctx sdk.Context, policyAddress sdk.AccAddress, policy *types.PolicyInfo) {
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.GetPolicyAddressKey(policyAddress), k.cdc.MustMarshalBinaryBare(policy))
+}
+
+func (k Keeper) GetPolicyInfo(ctx sdk.Context, policyAddress sdk.AccAddress) *types.PolicyInfo {
+	store := ctx.KVStore(k.storeKey)
+	var policy types.PolicyInfo
+	policyBz := store.Get(types.GetPolicyAddressKey(policyAddress))
+	if policyBz == nil {
+		return nil
+	}
+	k.cdc.MustUnmarshalBinaryBare(policyBz, &policy)
+	return &policy
+}
+
+func (k Keeper) IteratePoliciesByRegoCode(ctx sdk.Context, regoID uint64, cb func(address sdk.AccAddress) bool) {
+	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.GetPolicyByRegoIDSecondaryIndexPrefix(regoID))
+	for iter := prefixStore.Iterator(nil, nil); iter.Valid(); iter.Next() {
+		key := iter.Key()
+		if cb(key[types.AbsoluteTxPositionLen:]) {
+			return
+		}
+	}
+}
+
+func (k Keeper) setPolicyAdmin(ctx sdk.Context, policyAddress, caller, newAdmin sdk.AccAddress, authZ AuthorizationPolicy) error {
+	policyInfo := k.GetPolicyInfo(ctx, policyAddress)
+	if policyInfo == nil {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown policy")
+	}
+	if !authZ.CanModifyPolicy(policyInfo.AdminAddr(), caller) {
+		return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not modify policy")
+	}
+	policyInfo.Admin = newAdmin.String()
+	k.storePolicyInfo(ctx, policyAddress, policyInfo)
+	return nil
 }

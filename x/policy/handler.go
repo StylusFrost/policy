@@ -26,6 +26,13 @@ func NewHandler(k types.PolicyOpsKeeper) sdk.Handler {
 		case *types.MsgStoreRego:
 			res, err = msgServer.StoreRego(sdk.WrapSDKContext(ctx), msg)
 
+		case *types.MsgInstantiatePolicy:
+			res, err = msgServer.InstantiatePolicy(sdk.WrapSDKContext(ctx), msg)
+		case *types.MsgUpdateAdmin:
+			res, err = msgServer.UpdateAdmin(sdk.WrapSDKContext(ctx), msg)
+		case *types.MsgClearAdmin:
+			res, err = msgServer.ClearAdmin(sdk.WrapSDKContext(ctx), msg)
+
 		default:
 			errMsg := fmt.Sprintf("unrecognized policy message type: %T", msg)
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)

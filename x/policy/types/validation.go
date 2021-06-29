@@ -8,6 +8,8 @@ import (
 
 const (
 	MaxRegoSize = 500 * 1024
+	// MaxLabelSize is the longest label that can be used when Instantiating a policy
+	MaxLabelSize = 128
 )
 
 func validateSourceURL(source string) error {
@@ -32,6 +34,16 @@ func validateRegoCode(s []byte) error {
 	}
 	if len(s) > MaxRegoSize {
 		return sdkerrors.Wrapf(ErrLimit, "cannot be longer than %d bytes", MaxRegoSize)
+	}
+	return nil
+}
+
+func validateLabel(label string) error {
+	if label == "" {
+		return sdkerrors.Wrap(ErrEmpty, "is required")
+	}
+	if len(label) > MaxLabelSize {
+		return sdkerrors.Wrap(ErrLimit, "cannot be longer than 128 characters")
 	}
 	return nil
 }

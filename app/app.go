@@ -331,6 +331,8 @@ func New(
 		keys[policytypes.StoreKey],
 		keys[policytypes.MemStoreKey],
 		app.getSubspace(policytypes.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
 	)
 	policyModule := policy.NewAppModule(appCodec, &app.PolicyKeeper)
 

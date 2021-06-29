@@ -19274,6 +19274,102 @@ paths:
           format: uint64
       tags:
         - Query
+  '/policy/policy/{address}':
+    get:
+      summary: PolicyInfo gets the policy meta data
+      operationId: StylusFrostPolicyPolicyPolicyInfo
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              address:
+                type: string
+                title: address is the address of the policy
+              policyInfo:
+                type: object
+                properties:
+                  regoId:
+                    type: string
+                    format: uint64
+                    title: RegoID is the reference to the stored Rego code
+                  creator:
+                    type: string
+                    title: Creator address who initially instantiated the policy
+                  admin:
+                    type: string
+                    title: Admin is an optional address that can execute migrations
+                  label:
+                    type: string
+                    description: >-
+                      Label is optional metadata to be stored with a policy
+                      instance.
+                  created:
+                    title: >-
+                      Created Tx position when the policy was instantiated.
+
+                      This data should kept internal and not be exposed via
+                      query results. Just
+
+                      use for sorting
+                    type: object
+                    properties:
+                      blockHeight:
+                        type: string
+                        format: uint64
+                        title: BlockHeight is the block the policy was created at
+                      txIndex:
+                        type: string
+                        format: uint64
+                        title: >-
+                          TxIndex is a monotonic counter within the block
+                          (actual transaction index,
+
+                          or gas consumed)
+                    description: >-
+                      AbsoluteTxPosition is a unique transaction position that
+                      allows for global
+
+                      ordering of transactions.
+                  entryPoints:
+                    type: string
+                    format: byte
+                    title: Valid entry points json encoded
+                title: PolicyInfo stores a REGO policy instance
+            title: >-
+              QueryPolicyInfoResponse is the response type for the
+              Query/PolicyInfo RPC
+
+              method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    typeUrl:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          description: address is the address of the policy to query
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
   /policy/rego:
     get:
       summary: Regos gets the metadata for all stored rego codes
@@ -19454,6 +19550,116 @@ paths:
           required: true
           type: string
           format: uint64
+      tags:
+        - Query
+  '/policy/rego/{regoId}/policies':
+    get:
+      summary: PoliciesByRegoCode lists all smart policies for a rego id
+      operationId: StylusFrostPolicyPolicyPoliciesByRegoCode
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              policies:
+                type: array
+                items:
+                  type: string
+                title: contracts are a set of policy addresses
+              pagination:
+                description: pagination defines the pagination in the response.
+                type: object
+                properties:
+                  nextKey:
+                    type: string
+                    format: byte
+                    title: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+            title: |-
+              QueryPoliciesByRegoCodeResponse is the response type for the
+              Query/PoliciesByRegoCode RPC method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    typeUrl:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: regoId
+          in: path
+          required: true
+          type: string
+          format: uint64
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.countTotal
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
       tags:
         - Query
 definitions:
@@ -29670,6 +29876,24 @@ definitions:
     description: |-
       Version defines the versioning scheme used to negotiate the IBC verison in
       the connection handshake.
+  StylusFrost.policy.policy.AbsoluteTxPosition:
+    type: object
+    properties:
+      blockHeight:
+        type: string
+        format: uint64
+        title: BlockHeight is the block the policy was created at
+      txIndex:
+        type: string
+        format: uint64
+        title: >-
+          TxIndex is a monotonic counter within the block (actual transaction
+          index,
+
+          or gas consumed)
+    description: |-
+      AbsoluteTxPosition is a unique transaction position that allows for global
+      ordering of transactions.
   StylusFrost.policy.policy.AccessConfig:
     type: object
     properties:
@@ -29706,6 +29930,16 @@ definitions:
        - ACCESS_TYPE_ONLY_ADDRESS: AccessTypeOnlyAddress restricted to an address
        - ACCESS_TYPE_EVERYBODY: AccessTypeEverybody unrestricted
     title: AccessType permission types
+  StylusFrost.policy.policy.MsgClearAdminResponse:
+    type: object
+    title: MsgClearAdminResponse returns empty data
+  StylusFrost.policy.policy.MsgInstantiatePolicyResponse:
+    type: object
+    properties:
+      address:
+        type: string
+        description: Address is the bech32 address of the new policy instance.
+    title: MsgInstantiatePolicyResponse return instantiation result data
   StylusFrost.policy.policy.MsgStoreRegoResponse:
     type: object
     properties:
@@ -29714,6 +29948,143 @@ definitions:
         format: uint64
         title: RegoID is the reference to the stored REGO code
     description: MsgStoreCodeResponse returns store result data.
+  StylusFrost.policy.policy.MsgUpdateAdminResponse:
+    type: object
+    title: MsgUpdateAdminResponse returns empty data
+  StylusFrost.policy.policy.PolicyInfo:
+    type: object
+    properties:
+      regoId:
+        type: string
+        format: uint64
+        title: RegoID is the reference to the stored Rego code
+      creator:
+        type: string
+        title: Creator address who initially instantiated the policy
+      admin:
+        type: string
+        title: Admin is an optional address that can execute migrations
+      label:
+        type: string
+        description: Label is optional metadata to be stored with a policy instance.
+      created:
+        title: >-
+          Created Tx position when the policy was instantiated.
+
+          This data should kept internal and not be exposed via query results.
+          Just
+
+          use for sorting
+        type: object
+        properties:
+          blockHeight:
+            type: string
+            format: uint64
+            title: BlockHeight is the block the policy was created at
+          txIndex:
+            type: string
+            format: uint64
+            title: >-
+              TxIndex is a monotonic counter within the block (actual
+              transaction index,
+
+              or gas consumed)
+        description: >-
+          AbsoluteTxPosition is a unique transaction position that allows for
+          global
+
+          ordering of transactions.
+      entryPoints:
+        type: string
+        format: byte
+        title: Valid entry points json encoded
+    title: PolicyInfo stores a REGO policy instance
+  StylusFrost.policy.policy.QueryPoliciesByRegoCodeResponse:
+    type: object
+    properties:
+      policies:
+        type: array
+        items:
+          type: string
+        title: contracts are a set of policy addresses
+      pagination:
+        description: pagination defines the pagination in the response.
+        type: object
+        properties:
+          nextKey:
+            type: string
+            format: byte
+            title: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+    title: |-
+      QueryPoliciesByRegoCodeResponse is the response type for the
+      Query/PoliciesByRegoCode RPC method
+  StylusFrost.policy.policy.QueryPolicyInfoResponse:
+    type: object
+    properties:
+      address:
+        type: string
+        title: address is the address of the policy
+      policyInfo:
+        type: object
+        properties:
+          regoId:
+            type: string
+            format: uint64
+            title: RegoID is the reference to the stored Rego code
+          creator:
+            type: string
+            title: Creator address who initially instantiated the policy
+          admin:
+            type: string
+            title: Admin is an optional address that can execute migrations
+          label:
+            type: string
+            description: Label is optional metadata to be stored with a policy instance.
+          created:
+            title: >-
+              Created Tx position when the policy was instantiated.
+
+              This data should kept internal and not be exposed via query
+              results. Just
+
+              use for sorting
+            type: object
+            properties:
+              blockHeight:
+                type: string
+                format: uint64
+                title: BlockHeight is the block the policy was created at
+              txIndex:
+                type: string
+                format: uint64
+                title: >-
+                  TxIndex is a monotonic counter within the block (actual
+                  transaction index,
+
+                  or gas consumed)
+            description: >-
+              AbsoluteTxPosition is a unique transaction position that allows
+              for global
+
+              ordering of transactions.
+          entryPoints:
+            type: string
+            format: byte
+            title: Valid entry points json encoded
+        title: PolicyInfo stores a REGO policy instance
+    title: |-
+      QueryPolicyInfoResponse is the response type for the Query/PolicyInfo RPC
+      method
   StylusFrost.policy.policy.QueryRegoResponse:
     type: object
     properties:
