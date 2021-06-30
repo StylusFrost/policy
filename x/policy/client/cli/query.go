@@ -36,6 +36,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdListRego(),
 		GetCmdGetPolicyInfo(),
 		GetCmdListPolicyByCode(),
+		GetCmdGetPolicyHistory(),
 	)
 	return queryCmd
 }
@@ -201,5 +202,49 @@ func GetCmdListPolicyByCode() *cobra.Command {
 	}
 	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "list policy by rego code")
+	return cmd
+}
+
+// GetCmdGetPolicyHistory prints the code history for a given policy
+func GetCmdGetPolicyHistory() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "policy-history [bech32_address]",
+		Short:   "Prints out the code history for a policy given its address",
+		Long:    "Prints out the code history for a policy given its address",
+		Aliases: []string{"history", "hist", "ch"},
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			_, err = sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			pageReq, err := client.ReadPageRequest(withPageKeyDecoded(cmd.Flags()))
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+			res, err := queryClient.PolicyHistory(
+				context.Background(),
+				&types.QueryPolicyHistoryRequest{
+					Address:    args[0],
+					Pagination: pageReq,
+				},
+			)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "policy history")
 	return cmd
 }

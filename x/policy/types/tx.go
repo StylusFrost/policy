@@ -107,7 +107,6 @@ func (msg MsgInstantiatePolicy) GetSigners() []sdk.AccAddress {
 
 }
 
-
 func (msg MsgUpdateAdmin) Route() string {
 	return RouterKey
 }
@@ -170,6 +169,45 @@ func (msg MsgClearAdmin) GetSignBytes() []byte {
 }
 
 func (msg MsgClearAdmin) GetSigners() []sdk.AccAddress {
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil { // should never happen as valid basic rejects invalid addresses
+		panic(err.Error())
+	}
+	return []sdk.AccAddress{senderAddr}
+
+}
+
+func (msg MsgMigratePolicy) Route() string {
+	return RouterKey
+}
+
+func (msg MsgMigratePolicy) Type() string {
+	return "migrate"
+}
+
+func (msg MsgMigratePolicy) ValidateBasic() error {
+	if msg.RegoID == 0 {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "rego id is required")
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Sender); err != nil {
+		return sdkerrors.Wrap(err, "sender")
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Policy); err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	if !json.Valid(msg.EntryPoints) {
+		return sdkerrors.Wrap(ErrInvalid, "entry points json")
+	}
+
+	return nil
+}
+
+func (msg MsgMigratePolicy) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+
+}
+
+func (msg MsgMigratePolicy) GetSigners() []sdk.AccAddress {
 	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil { // should never happen as valid basic rejects invalid addresses
 		panic(err.Error())

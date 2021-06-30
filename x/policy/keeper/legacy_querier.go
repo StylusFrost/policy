@@ -15,6 +15,7 @@ const (
 	QueryListPolicytByRegoCode = "list-policies-by-rego"
 	QueryGetRego               = "rego"
 	QueryListRego              = "list-rego"
+	QueryPolicyHistory         = "policy-history"
 )
 
 // NewLegacyQuerier creates a new querier
@@ -40,6 +41,12 @@ func NewLegacyQuerier(keeper types.ViewKeeper, gasLimit sdk.Gas) sdk.Querier {
 				return nil, sdkerrors.Wrapf(types.ErrInvalid, "rego id: %s", err.Error())
 			}
 			rsp = queryPolicyListByRegoCode(ctx, regoID, keeper)
+		case QueryPolicyHistory:
+			policyAddr, err := sdk.AccAddressFromBech32(path[1])
+			if err != nil {
+				return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, err.Error())
+			}
+			rsp, err = queryPolicyHistory(ctx, policyAddr, keeper)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown data query endpoint")
 		}
@@ -79,4 +86,13 @@ func queryPolicyListByRegoCode(ctx sdk.Context, regoID uint64, keeper types.View
 		return false
 	})
 	return policies
+}
+
+func queryPolicyHistory(ctx sdk.Context, policyAddr sdk.AccAddress, keeper types.ViewKeeper) ([]types.PolicyRegoHistoryEntry, error) {
+	history := keeper.GetPolicyHistory(ctx, policyAddr)
+	// redact response
+	for i := range history {
+		history[i].Updated = nil
+	}
+	return history, nil
 }

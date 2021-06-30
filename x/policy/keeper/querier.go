@@ -159,3 +159,36 @@ func (q grpcQuerier) PoliciesByRegoCode(c context.Context, req *types.QueryPolic
 		Pagination: pageRes,
 	}, nil
 }
+
+func (q grpcQuerier) PolicyHistory(c context.Context, req *types.QueryPolicyHistoryRequest) (*types.QueryPolicyHistoryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	contractAddr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := sdk.UnwrapSDKContext(c)
+	r := make([]types.PolicyRegoHistoryEntry, 0)
+
+	prefixStore := prefix.NewStore(ctx.KVStore(q.storeKey), types.GetPolicyRegoHistoryElementPrefix(contractAddr))
+	pageRes, err := query.FilteredPaginate(prefixStore, req.Pagination, func(key []byte, value []byte, accumulate bool) (bool, error) {
+		if accumulate {
+			var e types.PolicyRegoHistoryEntry
+			if err := q.cdc.UnmarshalBinaryBare(value, &e); err != nil {
+				return false, err
+			}
+			e.Updated = nil // redact
+			r = append(r, e)
+		}
+		return true, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryPolicyHistoryResponse{
+		Entries:    r,
+		Pagination: pageRes,
+	}, nil
+}

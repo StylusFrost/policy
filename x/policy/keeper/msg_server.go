@@ -128,3 +128,30 @@ func (m msgServer) ClearAdmin(goCtx context.Context, msg *types.MsgClearAdmin) (
 
 	return &types.MsgClearAdminResponse{}, nil
 }
+
+func (m msgServer) MigratePolicy(goCtx context.Context, msg *types.MsgMigratePolicy) (*types.MsgMigratePolicyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "sender")
+	}
+	policyAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "policy")
+	}
+
+	err = m.keeper.Migrate(ctx, policyAddr, senderAddr, msg.RegoID, msg.EntryPoints)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
+		sdk.NewAttribute(types.AttributeKeyRegoID, fmt.Sprintf("%d", msg.RegoID)),
+		sdk.NewAttribute(types.AttributeKeyPolicyAddr, msg.Policy),
+	))
+
+	return &types.MsgMigratePolicyResponse{}, nil
+}

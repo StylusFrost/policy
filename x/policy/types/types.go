@@ -79,3 +79,14 @@ func (c *PolicyInfo) AdminAddr() sdk.AccAddress {
 	}
 	return admin
 }
+
+func (c *PolicyInfo) AddMigration(ctx sdk.Context, regoID uint64, entry_points []byte) PolicyRegoHistoryEntry {
+	h := PolicyRegoHistoryEntry{
+		Operation:   PolicyRegoHistoryOperationTypeMigrate,
+		RegoID:      regoID,
+		Updated:     NewAbsoluteTxPosition(ctx),
+		EntryPoints: entry_points,
+	}
+	c.RegoID = regoID
+	return h
+}

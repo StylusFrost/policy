@@ -19370,6 +19370,158 @@ paths:
           type: string
       tags:
         - Query
+  '/policy/policy/{address}/history':
+    get:
+      summary: PolicyHistory gets the policy code history
+      operationId: StylusFrostPolicyPolicyPolicyHistory
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              entries:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    operation:
+                      type: string
+                      enum:
+                        - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+                        - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT
+                        - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE
+                        - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS
+                      default: POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+                      description: >-
+                        - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED:
+                        PolicyRegoHistoryOperationTypeUnspecified placeholder
+                        for empty value
+                         - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT: PolicyRegoHistoryOperationTypeInit on chain policy instantiation
+                         - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE: PolicyRegoHistoryOperationTypeMigrate rego migration
+                         - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS: PolicyRegoHistoryOperationTypeGenesis based on genesis data
+                      title: >-
+                        PolicyRegoHistoryOperationType actions that caused a
+                        rego change
+                    regoId:
+                      type: string
+                      format: uint64
+                      title: RegoID is the reference to the stored REGO code
+                    updated:
+                      description: Updated Tx position when the operation was executed.
+                      type: object
+                      properties:
+                        blockHeight:
+                          type: string
+                          format: uint64
+                          title: BlockHeight is the block the policy was created at
+                        txIndex:
+                          type: string
+                          format: uint64
+                          title: >-
+                            TxIndex is a monotonic counter within the block
+                            (actual transaction index,
+
+                            or gas consumed)
+                    entryPoints:
+                      type: string
+                      format: byte
+                  description: PolicyRegoHistoryEntry metadata to a policy.
+              pagination:
+                description: pagination defines the pagination in the response.
+                type: object
+                properties:
+                  nextKey:
+                    type: string
+                    format: byte
+                    title: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+            title: |-
+              QueryPolicyHistoryResponse is the response type for the
+              Query/PolicyHistory RPC method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    typeUrl:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          description: address is the address of the policy to query
+          in: path
+          required: true
+          type: string
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.countTotal
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
   /policy/rego:
     get:
       summary: Regos gets the metadata for all stored rego codes
@@ -19566,7 +19718,7 @@ paths:
                 type: array
                 items:
                   type: string
-                title: contracts are a set of policy addresses
+                title: policies are a set of policy addresses
               pagination:
                 description: pagination defines the pagination in the response.
                 type: object
@@ -29940,6 +30092,9 @@ definitions:
         type: string
         description: Address is the bech32 address of the new policy instance.
     title: MsgInstantiatePolicyResponse return instantiation result data
+  StylusFrost.policy.policy.MsgMigratePolicyResponse:
+    type: object
+    description: MsgMigratePolicyResponse returns policy migration result data.
   StylusFrost.policy.policy.MsgStoreRegoResponse:
     type: object
     properties:
@@ -29999,6 +30154,63 @@ definitions:
         format: byte
         title: Valid entry points json encoded
     title: PolicyInfo stores a REGO policy instance
+  StylusFrost.policy.policy.PolicyRegoHistoryEntry:
+    type: object
+    properties:
+      operation:
+        type: string
+        enum:
+          - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+          - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT
+          - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE
+          - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS
+        default: POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+        description: >-
+          - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED:
+          PolicyRegoHistoryOperationTypeUnspecified placeholder for empty value
+           - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT: PolicyRegoHistoryOperationTypeInit on chain policy instantiation
+           - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE: PolicyRegoHistoryOperationTypeMigrate rego migration
+           - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS: PolicyRegoHistoryOperationTypeGenesis based on genesis data
+        title: PolicyRegoHistoryOperationType actions that caused a rego change
+      regoId:
+        type: string
+        format: uint64
+        title: RegoID is the reference to the stored REGO code
+      updated:
+        description: Updated Tx position when the operation was executed.
+        type: object
+        properties:
+          blockHeight:
+            type: string
+            format: uint64
+            title: BlockHeight is the block the policy was created at
+          txIndex:
+            type: string
+            format: uint64
+            title: >-
+              TxIndex is a monotonic counter within the block (actual
+              transaction index,
+
+              or gas consumed)
+      entryPoints:
+        type: string
+        format: byte
+    description: PolicyRegoHistoryEntry metadata to a policy.
+  StylusFrost.policy.policy.PolicyRegoHistoryOperationType:
+    type: string
+    enum:
+      - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+      - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT
+      - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE
+      - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS
+    default: POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+    description: >-
+      - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED:
+      PolicyRegoHistoryOperationTypeUnspecified placeholder for empty value
+       - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT: PolicyRegoHistoryOperationTypeInit on chain policy instantiation
+       - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE: PolicyRegoHistoryOperationTypeMigrate rego migration
+       - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS: PolicyRegoHistoryOperationTypeGenesis based on genesis data
+    title: PolicyRegoHistoryOperationType actions that caused a rego change
   StylusFrost.policy.policy.QueryPoliciesByRegoCodeResponse:
     type: object
     properties:
@@ -30006,7 +30218,7 @@ definitions:
         type: array
         items:
           type: string
-        title: contracts are a set of policy addresses
+        title: policies are a set of policy addresses
       pagination:
         description: pagination defines the pagination in the response.
         type: object
@@ -30028,6 +30240,75 @@ definitions:
     title: |-
       QueryPoliciesByRegoCodeResponse is the response type for the
       Query/PoliciesByRegoCode RPC method
+  StylusFrost.policy.policy.QueryPolicyHistoryResponse:
+    type: object
+    properties:
+      entries:
+        type: array
+        items:
+          type: object
+          properties:
+            operation:
+              type: string
+              enum:
+                - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+                - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT
+                - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE
+                - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS
+              default: POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED
+              description: >-
+                - POLICY_REGO_HISTORY_OPERATION_TYPE_UNSPECIFIED:
+                PolicyRegoHistoryOperationTypeUnspecified placeholder for empty
+                value
+                 - POLICY_REGO_HISTORY_OPERATION_TYPE_INIT: PolicyRegoHistoryOperationTypeInit on chain policy instantiation
+                 - POLICY_REGO_HISTORY_OPERATION_TYPE_MIGRATE: PolicyRegoHistoryOperationTypeMigrate rego migration
+                 - POLICY_REGO_HISTORY_OPERATION_TYPE_GENESIS: PolicyRegoHistoryOperationTypeGenesis based on genesis data
+              title: PolicyRegoHistoryOperationType actions that caused a rego change
+            regoId:
+              type: string
+              format: uint64
+              title: RegoID is the reference to the stored REGO code
+            updated:
+              description: Updated Tx position when the operation was executed.
+              type: object
+              properties:
+                blockHeight:
+                  type: string
+                  format: uint64
+                  title: BlockHeight is the block the policy was created at
+                txIndex:
+                  type: string
+                  format: uint64
+                  title: >-
+                    TxIndex is a monotonic counter within the block (actual
+                    transaction index,
+
+                    or gas consumed)
+            entryPoints:
+              type: string
+              format: byte
+          description: PolicyRegoHistoryEntry metadata to a policy.
+      pagination:
+        description: pagination defines the pagination in the response.
+        type: object
+        properties:
+          nextKey:
+            type: string
+            format: byte
+            title: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+    title: |-
+      QueryPolicyHistoryResponse is the response type for the
+      Query/PolicyHistory RPC method
   StylusFrost.policy.policy.QueryPolicyInfoResponse:
     type: object
     properties:

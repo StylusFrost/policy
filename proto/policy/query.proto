@@ -34,6 +34,11 @@ service Query {
     option (google.api.http).get = "/policy/rego/{rego_id}/policies";
   }
 
+  // PolicyHistory gets the policy code history
+  rpc PolicyHistory(QueryPolicyHistoryRequest)
+      returns (QueryPolicyHistoryResponse) {
+    option (google.api.http).get = "/policy/policy/{address}/history";
+  }
 
 }
 
@@ -111,9 +116,27 @@ message QueryPoliciesByRegoCodeRequest {
 // QueryPoliciesByRegoCodeResponse is the response type for the
 // Query/PoliciesByRegoCode RPC method
 message QueryPoliciesByRegoCodeResponse {
-  // contracts are a set of policy addresses
+  // policies are a set of policy addresses
   repeated string policies = 1;
 
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryPolicyHistoryRequest is the request type for the Query/PolicyHistory
+// RPC method
+message QueryPolicyHistoryRequest {
+  // address is the address of the policy to query
+  string address = 1;
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryPolicyHistoryResponse is the response type for the
+// Query/PolicyHistory RPC method
+message QueryPolicyHistoryResponse {
+  repeated PolicyRegoHistoryEntry entries = 1
+      [ (gogoproto.nullable) = false ];
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

@@ -405,3 +405,64 @@ func (k Keeper) setPolicyAdmin(ctx sdk.Context, policyAddress, caller, newAdmin 
 	k.storePolicyInfo(ctx, policyAddress, policyInfo)
 	return nil
 }
+
+func (k Keeper) migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte, authZ AuthorizationPolicy) error {
+
+	// TODO: GAS COST
+
+	policyInfo := k.GetPolicyInfo(ctx, policyAddress)
+	if policyInfo == nil {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown policy")
+	}
+	if !authZ.CanModifyPolicy(policyInfo.AdminAddr(), caller) {
+		return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not migrate")
+	}
+
+	newCodeInfo := k.GetRegoInfo(ctx, newRegoID)
+	if newCodeInfo == nil {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown rego")
+	}
+
+	//TODO: verify entry_points vs newCodeInfo.EntryPoints
+
+	policyInfo.RegoID = newRegoID
+
+	// delete old secondary index entry
+	k.removeFromPolicyRegoSecondaryIndex(ctx, policyAddress, k.getLastPolicyHistoryEntry(ctx, policyAddress))
+	// persist migration updates
+	historyEntry := policyInfo.AddMigration(ctx, newRegoID, entry_points)
+	k.appendToPolicyHistory(ctx, policyAddress, historyEntry)
+	k.addToPolicyRegoSecondaryIndex(ctx, policyAddress, historyEntry)
+	k.storePolicyInfo(ctx, policyAddress, policyInfo)
+
+	return nil
+}
+
+// removeFromPolicyCodeSecondaryIndex removes element to the index for policies-by-regoid queries
+func (k Keeper) removeFromPolicyRegoSecondaryIndex(ctx sdk.Context, policyAddress sdk.AccAddress, entry types.PolicyRegoHistoryEntry) {
+	ctx.KVStore(k.storeKey).Delete(types.GetPolicyByCreatedSecondaryIndexKey(policyAddress, entry))
+}
+
+func (k Keeper) getLastPolicyHistoryEntry(ctx sdk.Context, policyAddr sdk.AccAddress) types.PolicyRegoHistoryEntry {
+	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.GetPolicyRegoHistoryElementPrefix(policyAddr))
+	iter := prefixStore.ReverseIterator(nil, nil)
+	var r types.PolicyRegoHistoryEntry
+	if !iter.Valid() {
+		// all policys have a history
+		panic(fmt.Sprintf("no history for %s", policyAddr.String()))
+	}
+	k.cdc.MustUnmarshalBinaryBare(iter.Value(), &r)
+	return r
+}
+
+func (k Keeper) GetPolicyHistory(ctx sdk.Context, policyAddr sdk.AccAddress) []types.PolicyRegoHistoryEntry {
+	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.GetPolicyRegoHistoryElementPrefix(policyAddr))
+	r := make([]types.PolicyRegoHistoryEntry, 0)
+	iter := prefixStore.Iterator(nil, nil)
+	for ; iter.Valid(); iter.Next() {
+		var e types.PolicyRegoHistoryEntry
+		k.cdc.MustUnmarshalBinaryBare(iter.Value(), &e)
+		r = append(r, e)
+	}
+	return r
+}

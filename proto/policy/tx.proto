@@ -21,6 +21,9 @@ service Msg {
   rpc UpdateAdmin(MsgUpdateAdmin) returns (MsgUpdateAdminResponse);
   // ClearAdmin removes any admin stored for a smart policy
   rpc ClearAdmin(MsgClearAdmin) returns (MsgClearAdminResponse);
+   // Migrate runs a code upgrade/ downgrade for a smart policy
+    rpc MigratePolicy(MsgMigratePolicy) returns (MsgMigratePolicyResponse);
+  // UpdateAdmin sets a new   admin for a smart policy
 }
 
 // MsgStoreRego submit Rego code to the system
@@ -96,3 +99,19 @@ message MsgClearAdmin {
 
 // MsgClearAdminResponse returns empty data
 message MsgClearAdminResponse {}
+
+
+// MsgMigratePolicy runs a code upgrade/ downgrade for a smart policy
+message MsgMigratePolicy {
+  // Sender is the that actor that signed the messages
+  string sender = 1;
+  // Policy is the address of the smart policy
+  string policy = 2;
+  // RegoID references the new REGO code
+  uint64 rego_id = 3 [ (gogoproto.customname) = "RegoID" ];
+   // Valid entry points json encoded 
+  bytes entry_points = 5 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+}
+
+// MsgMigratePolicyResponse returns policy migration result data.
+message MsgMigratePolicyResponse {}

@@ -50,7 +50,7 @@ func GetTxCmd() *cobra.Command {
 		InstantiatePolicyCmd(),
 		UpdatePolicyAdminCmd(),
 		ClearPolicyAdminCmd(),
-
+		MigratePolicyCmd(),
 	)
 	return txCmd
 }
@@ -225,7 +225,6 @@ func parseInstantiateArgs(rawRegoID, entry_points string, sender sdk.AccAddress,
 	return msg, nil
 }
 
-
 // UpdatePolicyAdminCmd sets an new admin for a policy
 func UpdatePolicyAdminCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -252,7 +251,7 @@ func UpdatePolicyAdminCmd() *cobra.Command {
 func parseUpdatePolicyAdminArgs(args []string, cliCtx client.Context) (types.MsgUpdateAdmin, error) {
 	msg := types.MsgUpdateAdmin{
 		Sender:   cliCtx.GetFromAddress().String(),
-		Policy: args[0],
+		Policy:   args[0],
 		NewAdmin: args[1],
 	}
 	return msg, nil
@@ -271,7 +270,7 @@ func ClearPolicyAdminCmd() *cobra.Command {
 			}
 
 			msg := types.MsgClearAdmin{
-				Sender:   clientCtx.GetFromAddress().String(),
+				Sender: clientCtx.GetFromAddress().String(),
 				Policy: args[0],
 			}
 			if err := msg.ValidateBasic(); err != nil {
@@ -282,4 +281,53 @@ func ClearPolicyAdminCmd() *cobra.Command {
 	}
 	flags.AddTxFlagsToCmd(cmd)
 	return cmd
+}
+
+// MigratePolicyCmd will migrate a policy to a new code version
+func MigratePolicyCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "migrate [policy_addr_bech32] [new_rego_id_int64] [json_encoded_migration_args]",
+		Short:   "Migrate a rego policy to a new code version",
+		Aliases: []string{"update", "mig", "m"},
+		Args:    cobra.ExactArgs(3),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+
+			msg, err := parseMigratePolicyArgs(args, clientCtx)
+			if err != nil {
+				return err
+			}
+			if err := msg.ValidateBasic(); err != nil {
+				return nil
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+
+func parseMigratePolicyArgs(args []string, cliCtx client.Context) (types.MsgMigratePolicy, error) {
+	// get the id of the code to instantiate
+	regoID, err := strconv.ParseUint(args[1], 10, 64)
+	if err != nil {
+		return types.MsgMigratePolicy{}, sdkerrors.Wrap(err, "rego id")
+	}
+
+	entry_points := args[2]
+
+	var entryPointsArr []string
+	errJson := json.Unmarshal([]byte(entry_points), &entryPointsArr)
+
+	if errJson != nil {
+		return types.MsgMigratePolicy{}, fmt.Errorf("entry_points: invalid json array")
+	}
+
+	msg := types.MsgMigratePolicy{
+		Sender:      cliCtx.GetFromAddress().String(),
+		Policy:      args[0],
+		RegoID:      regoID,
+		EntryPoints: []byte(entry_points),
+	}
+	return msg, nil
 }
