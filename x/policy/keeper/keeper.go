@@ -426,6 +426,7 @@ func (k Keeper) migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sd
 	//TODO: verify entry_points vs newCodeInfo.EntryPoints
 
 	policyInfo.RegoID = newRegoID
+	policyInfo.EntryPoints = entry_points
 
 	// delete old secondary index entry
 	k.removeFromPolicyRegoSecondaryIndex(ctx, policyAddress, k.getLastPolicyHistoryEntry(ctx, policyAddress))
