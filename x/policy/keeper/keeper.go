@@ -88,8 +88,8 @@ func (k Keeper) create(ctx sdk.Context, creator sdk.AccAddress, regoCode []byte,
 	// Gas Consume Rego Compiling
 	ctx.GasMeter().ConsumeGas(CompileCost*uint64(len(regoCode)), "Compiling REGO Bytecode")
 
-	// Verify if it is valid REGO code
-	regoHash, err := k.regoCompile(regoCode)
+	// Verify if it is valid REGO code and entry_points are valid
+	regoHash, err := k.regoValidateAndCompile(regoCode, entryPointsArr)
 
 	if err != nil {
 		return 0, sdkerrors.Wrap(types.ErrCompileFailed, err.Error())
@@ -98,9 +98,6 @@ func (k Keeper) create(ctx sdk.Context, creator sdk.AccAddress, regoCode []byte,
 	// Store Rego Code
 	k.storeRegoHash(ctx, regoHash, regoCode)
 
-	if err != nil {
-		return 0, sdkerrors.Wrap(types.ErrCreateFailed, err.Error())
-	}
 	regoID = k.autoIncrementID(ctx, types.KeyLastRegoID)
 
 	if instantiateAccess == nil {
@@ -119,14 +116,32 @@ func (k Keeper) storeRegoInfo(ctx sdk.Context, regoID uint64, regoInfo types.Reg
 	store.Set(types.GetRegoKey(regoID), k.cdc.MustMarshalBinaryBare(&regoInfo))
 }
 
-func (k Keeper) regoCompile(regoCode []byte) ([]byte, error) {
+func (k Keeper) regoValidateAndCompile(regoCode []byte, entry_points []string) ([]byte, error) {
 
 	// Load Rego Policy
-	_, err := ast.ParseModule("policy", string(regoCode))
+	mod, err := ast.ParseModule("policy", string(regoCode))
 
 	if err != nil {
-		// Load Policy problem
+		// Load Policy parse problem
 		return nil, err
+	}
+
+	// Create a new compiler instance and compile the module.
+	compiler := ast.NewCompiler()
+
+	mods := map[string]*ast.Module{
+		"policy": mod,
+	}
+
+	if compiler.Compile(mods); compiler.Failed() {
+		return nil, compiler.Errors
+	}
+
+	// Verify entrypoints
+	for _, entry := range entry_points {
+		if len(compiler.GetRulesWithPrefix(ast.MustParseRef("data."+entry))) == 0 {
+			return nil, sdkerrors.Wrap(types.ErrEntryPoint, entry)
+		}
 	}
 
 	// Get SHA256 regoCode
@@ -246,13 +261,19 @@ func (k Keeper) IterateRegoInfos(ctx sdk.Context, cb func(uint64, types.RegoInfo
 
 func (k Keeper) instantiate(ctx sdk.Context, regoID uint64, creator, admin sdk.AccAddress, entry_points []byte, label string, deposit sdk.Coins, authZ AuthorizationPolicy) (sdk.AccAddress, error) {
 
+	var entryPointsArr []types.EntryPoint
+	err := json.Unmarshal(entry_points, &entryPointsArr)
+
+	if err != nil {
+		return nil, sdkerrors.Wrap(types.ErrInvalidMsg, err.Error())
+	}
+
 	// create policy address
 	policyAddress := k.generatePolicyAddress(ctx, regoID)
 	existingAcct := k.accountKeeper.GetAccount(ctx, policyAddress)
 	if existingAcct != nil {
 		return nil, sdkerrors.Wrap(types.ErrAccountExists, existingAcct.GetAddress().String())
 	}
-
 	// deposit initial policy funds
 	if !deposit.IsZero() {
 		if err := k.bank.TransferCoins(ctx, creator, policyAddress, deposit); err != nil {
@@ -279,7 +300,12 @@ func (k Keeper) instantiate(ctx sdk.Context, regoID uint64, creator, admin sdk.A
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not instantiate")
 	}
 
-	//TODO: verify entry_points vs codeInfo.EntryPoints
+	// Verify if all msg Entry points exist into rego id
+	for _, v := range entryPointsArr {
+		if !contains(regoInfo.EntryPoints, v.Value) {
+			return nil, sdkerrors.Wrap(types.ErrEntryPoint, "entry point")
+		}
+	}
 
 	// TODO: GAS CONSUME
 
@@ -315,6 +341,15 @@ func addrFromUint64(id uint64) sdk.AccAddress {
 	addr[0] = 'C'
 	binary.PutUvarint(addr[1:], id)
 	return sdk.AccAddress(crypto.AddressHash(addr))
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
 
 // BankCoinTransferrer replicates the cosmos-sdk behaviour as in

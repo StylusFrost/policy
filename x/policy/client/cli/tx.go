@@ -206,7 +206,7 @@ func parseInstantiateArgs(rawRegoID, entry_points string, sender sdk.AccAddress,
 		return types.MsgInstantiatePolicy{}, fmt.Errorf("admin: %s", err)
 	}
 
-	var entryPointsArr []string
+	var entryPointsArr []types.EntryPoint
 	errJson := json.Unmarshal([]byte(entry_points), &entryPointsArr)
 
 	if errJson != nil {
@@ -316,7 +316,7 @@ func parseMigratePolicyArgs(args []string, cliCtx client.Context) (types.MsgMigr
 
 	entry_points := args[2]
 
-	var entryPointsArr []string
+	var entryPointsArr []types.EntryPoint
 	errJson := json.Unmarshal([]byte(entry_points), &entryPointsArr)
 
 	if errJson != nil {

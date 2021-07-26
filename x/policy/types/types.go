@@ -90,3 +90,12 @@ func (c *PolicyInfo) AddMigration(ctx sdk.Context, regoID uint64, entry_points [
 	c.RegoID = regoID
 	return h
 }
+
+type (
+	EntryPoint struct {
+		Name        string
+		Description string
+		Value       string
+		Fee         bool
+	}
+)

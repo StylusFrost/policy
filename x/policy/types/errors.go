@@ -11,6 +11,9 @@ var (
 	// ErrLimit error for content that exceeds a limit
 	ErrLimit = sdkErrors.Register(DefaultCodespace, 13, "exceeds limit")
 
+	// ErrEntryPoint error for entry point
+	ErrEntryPoint = sdkErrors.Register(DefaultCodespace, 15, "invalid Entry Point")
+
 	// ErrCreateFailed error for rego code that has already been uploaded or failed
 	ErrCreateFailed = sdkErrors.Register(DefaultCodespace, 2, "create Rego Policy failed")
 
