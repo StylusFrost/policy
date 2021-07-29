@@ -93,9 +93,17 @@ func (c *PolicyInfo) AddMigration(ctx sdk.Context, regoID uint64, entry_points [
 
 type (
 	EntryPoint struct {
-		Name        string
+		Entry       string
 		Description string
-		Value       string
 		Fee         bool
 	}
 )
+
+type (
+	ExecuteMsg struct {
+		EntryPoint string
+		Input      []byte
+	}
+)
+
+

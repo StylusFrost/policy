@@ -17,6 +17,8 @@ type PolicyOpsKeeper interface {
 	ClearPolicyAdmin(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress) error
 	// Migrate allows to upgrade a policy to a new rego
 	Migrate(ctx sdk.Context, contractAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, msg []byte) error
+	// Execute executes the policy instance
+	Execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error)
 }
 
 // ViewKeeper provides read only operations

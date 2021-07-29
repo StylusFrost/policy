@@ -51,8 +51,58 @@ func GetTxCmd() *cobra.Command {
 		UpdatePolicyAdminCmd(),
 		ClearPolicyAdminCmd(),
 		MigratePolicyCmd(),
+		ExecutePolicyCmd(),
 	)
 	return txCmd
+}
+
+// ExecutePolicyCmd will instantiate a policy from previously uploaded code.
+func ExecutePolicyCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "execute [policy_addr_bech32] [entry_point] [json_encoded_input] --amount [coins,optional]",
+		Short:   "Execute a entry point on a rego policy",
+		Aliases: []string{"run", "call", "exec", "ex", "e"},
+		Args:    cobra.ExactArgs(3),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+
+			msg, err := parseExecuteArgs(args[0], args[1], args[2], clientCtx.GetFromAddress(), cmd.Flags())
+			if err != nil {
+				return err
+			}
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	cmd.Flags().String(flagAmount, "", "Coins to send to the policy along with command")
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
+}
+func parseExecuteArgs(policyAddr string, entry_point string, inputMsg string, sender sdk.AccAddress, flags *flag.FlagSet) (types.MsgExecutePolicy, error) {
+	amountStr, err := flags.GetString(flagAmount)
+	if err != nil {
+		return types.MsgExecutePolicy{}, fmt.Errorf("amount: %s", err)
+	}
+
+	amount, err := sdk.ParseCoinsNormalized(amountStr)
+	if err != nil {
+		return types.MsgExecutePolicy{}, err
+	}
+
+	if !json.Valid([]byte(inputMsg)) {
+		return types.MsgExecutePolicy{}, fmt.Errorf("input: invalid json")
+	}
+
+	return types.MsgExecutePolicy{
+		Sender:     sender.String(),
+		Policy:     policyAddr,
+		EntryPoint: entry_point,
+		Funds:      amount,
+		Input:      []byte(inputMsg),
+	}, nil
 }
 
 // StoreRegoCmd will upload rego to be reused.

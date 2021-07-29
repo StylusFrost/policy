@@ -5,4 +5,5 @@ const ( // event attributes
 	AttributeKeySigner     = "signer"
 	AttributeKeyPolicyAddr = "policy_address"
 	AttributeKeyPolicy     = "policy"
+	AttributeResultDataHex = "result"
 )

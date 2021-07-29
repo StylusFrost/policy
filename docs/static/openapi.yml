@@ -30085,6 +30085,14 @@ definitions:
   StylusFrost.policy.policy.MsgClearAdminResponse:
     type: object
     title: MsgClearAdminResponse returns empty data
+  StylusFrost.policy.policy.MsgExecutePolicyResponse:
+    type: object
+    properties:
+      data:
+        type: string
+        format: byte
+        title: Data contains the json data returned from the smart policy
+    description: MsgExecutePolicyResponse returns execution result data.
   StylusFrost.policy.policy.MsgInstantiatePolicyResponse:
     type: object
     properties:

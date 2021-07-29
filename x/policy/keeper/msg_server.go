@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/StylusFrost/policy/x/policy/types"
@@ -17,6 +18,35 @@ type msgServer struct {
 
 func NewMsgServerImpl(k types.PolicyOpsKeeper) types.MsgServer {
 	return &msgServer{keeper: k}
+}
+
+func (m msgServer) ExecutePolicy(goCtx context.Context, msg *types.MsgExecutePolicy) (*types.MsgExecutePolicyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "sender")
+	}
+	contractAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "contract")
+	}
+
+	data, err := m.keeper.Execute(ctx, contractAddr, senderAddr, msg.EntryPoint, msg.Input, msg.Funds)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
+		sdk.NewAttribute(types.AttributeKeyPolicyAddr, msg.Policy),
+		sdk.NewAttribute(types.AttributeResultDataHex, hex.EncodeToString(data)),
+	))
+
+	return &types.MsgExecutePolicyResponse{
+		Data: data,
+	}, nil
 }
 
 func (m msgServer) StoreRego(goCtx context.Context, msg *types.MsgStoreRego) (*types.MsgStoreRegoResponse, error) {

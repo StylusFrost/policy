@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
@@ -17,6 +19,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/open-policy-agent/opa/ast"
+	"github.com/open-policy-agent/opa/rego"
 )
 
 // CompileCost is how much SDK gas we charge *per byte* for compiling REGO code.
@@ -25,6 +28,9 @@ const CompileCost uint64 = 2
 type CoinTransferrer interface {
 	// TransferCoins sends the coin amounts from the source to the destination with rules applied.
 	TransferCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
+	HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool
+	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) int
+	GetSupply(ctx sdk.Context, denom string) int
 }
 
 type (
@@ -52,6 +58,8 @@ func NewKeeper(
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
 
+	RegistryCosmosBuiltins()
+
 	return &Keeper{
 		cdc:           cdc,
 		storeKey:      storeKey,
@@ -65,6 +73,61 @@ func NewKeeper(
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+func (k Keeper) execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error) {
+
+	// TODO: GAS COST
+
+	// Get Policy info
+	policyInfo := k.GetPolicyInfo(ctx, policyAddress)
+	if policyInfo == nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown policy")
+	}
+
+	// Verify execute entry point is valid Policy Entry Points
+
+	var entryPointsArr []types.EntryPoint
+	err := json.Unmarshal(policyInfo.EntryPoints, &entryPointsArr)
+
+	if err != nil {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, err.Error())
+	}
+
+	var found bool
+
+	// Verify entrypoints
+	for _, entry := range entryPointsArr {
+		if entry.Entry == entry_point {
+			found = true
+		}
+
+	}
+	if !found {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, "Invalid Entry Point")
+	}
+	// get rego code
+
+	regoCode, err := k.GetByteRego(ctx, policyInfo.RegoID)
+	if err != nil {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, err.Error())
+	}
+
+	// add more funds
+	if !coins.IsZero() {
+		if err := k.bank.TransferCoins(ctx, caller, policyAddress, coins); err != nil {
+			return nil, err
+		}
+	}
+
+	// Execute Policy
+	data, err := k.regoExecute(ctx, regoCode, entry_point, input, caller, policyAddress)
+
+	if err != nil {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, err.Error())
+	}
+
+	return data, nil
 }
 
 func (k Keeper) create(ctx sdk.Context, creator sdk.AccAddress, regoCode []byte, source string, entry_points []byte, instantiateAccess *types.AccessConfig, authZ AuthorizationPolicy) (regoID uint64, err error) {
@@ -89,7 +152,7 @@ func (k Keeper) create(ctx sdk.Context, creator sdk.AccAddress, regoCode []byte,
 	ctx.GasMeter().ConsumeGas(CompileCost*uint64(len(regoCode)), "Compiling REGO Bytecode")
 
 	// Verify if it is valid REGO code and entry_points are valid
-	regoHash, err := k.regoValidateAndCompile(regoCode, entryPointsArr)
+	regoHash, err := k.regoValidateAndCompile(ctx, regoCode, entryPointsArr)
 
 	if err != nil {
 		return 0, sdkerrors.Wrap(types.ErrCompileFailed, err.Error())
@@ -116,7 +179,7 @@ func (k Keeper) storeRegoInfo(ctx sdk.Context, regoID uint64, regoInfo types.Reg
 	store.Set(types.GetRegoKey(regoID), k.cdc.MustMarshalBinaryBare(&regoInfo))
 }
 
-func (k Keeper) regoValidateAndCompile(regoCode []byte, entry_points []string) ([]byte, error) {
+func (k Keeper) regoValidateAndCompile(ctx sdk.Context, regoCode []byte, entry_points []string) ([]byte, error) {
 
 	// Load Rego Policy
 	mod, err := ast.ParseModule("policy", string(regoCode))
@@ -150,6 +213,72 @@ func (k Keeper) regoValidateAndCompile(regoCode []byte, entry_points []string) (
 	return h.Sum(nil), nil
 }
 
+func (k Keeper) regoExecute(ctx sdk.Context, regoCode []byte, entry_point string, input []byte, caller sdk.AccAddress, policyAddress sdk.AccAddress) ([]byte, error) {
+
+	ctxRego := context.Background()
+
+	// Load Rego Policy
+	mod, err := ast.ParseModule("policy", string(regoCode))
+
+	if err != nil {
+		// Load Policy parse problem
+		return nil, err
+	}
+
+	// Create a new compiler instance and compile the module.
+	compiler := ast.NewCompiler()
+
+	mods := map[string]*ast.Module{
+		"policy": mod,
+	}
+
+	// Load Cosmos Builtins
+	k.LoadCosmosBuiltins(ctx, caller, policyAddress)
+
+	if compiler.Compile(mods); compiler.Failed() {
+		return nil, compiler.Errors
+	}
+
+	// Verify entrypoint
+	if len(compiler.GetRulesWithPrefix(ast.MustParseRef("data."+entry_point))) == 0 {
+		return nil, sdkerrors.Wrap(types.ErrEntryPoint, entry_point)
+	}
+
+	// Raw input data that will be used in evaluation.
+	raw := string(input)
+	d := json.NewDecoder(bytes.NewBufferString(raw))
+
+	var inputDecode interface{}
+
+	if err := d.Decode(&inputDecode); err != nil {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, err.Error())
+	}
+
+	// Create a new query that uses the compiled policy from above.
+	rego := rego.New(
+		rego.Query("data."+entry_point),
+		rego.Compiler(compiler),
+		rego.Input(inputDecode),
+	)
+	// Run evaluation.
+	rs, err := rego.Eval(ctxRego)
+
+	if err != nil {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, err.Error())
+	}
+
+	if len(rs) == 0 {
+		return nil, types.ErrExecuteFailed
+	}
+
+	data, err := json.Marshal(rs[0].Expressions[0].Value)
+
+	if err != nil {
+		return nil, sdkerrors.Wrap(types.ErrExecuteFailed, err.Error())
+	}
+
+	return data, nil
+}
 func (k Keeper) storeRegoHash(ctx sdk.Context, regoHash []byte, regoCode []byte) {
 	store := ctx.KVStore(k.storeKey)
 	// Save if not exist
@@ -287,14 +416,7 @@ func (k Keeper) instantiate(ctx sdk.Context, regoID uint64, creator, admin sdk.A
 		k.accountKeeper.SetAccount(ctx, policyAccount)
 	}
 
-	// get rego info
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetRegoKey(regoID))
-	if bz == nil {
-		return nil, sdkerrors.Wrap(types.ErrNotFound, "rego")
-	}
-	var regoInfo types.RegoInfo
-	k.cdc.MustUnmarshalBinaryBare(bz, &regoInfo)
+	regoInfo := k.GetRegoInfo(ctx, regoID)
 
 	if !authZ.CanInstantiatePolicy(regoInfo.InstantiateConfig, creator) {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not instantiate")
@@ -302,7 +424,7 @@ func (k Keeper) instantiate(ctx sdk.Context, regoID uint64, creator, admin sdk.A
 
 	// Verify if all msg Entry points exist into rego id
 	for _, v := range entryPointsArr {
-		if !contains(regoInfo.EntryPoints, v.Value) {
+		if !contains(regoInfo.EntryPoints, v.Entry) {
 			return nil, sdkerrors.Wrap(types.ErrEntryPoint, "entry point")
 		}
 	}
@@ -378,6 +500,35 @@ func (c BankCoinTransferrer) TransferCoins(ctx sdk.Context, fromAddr sdk.AccAddr
 		return sdkerr
 	}
 	return nil
+}
+
+// GetTotalSupplyAmount get total Supply from input denom
+func (c BankCoinTransferrer) HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool {
+
+	return c.keeper.HasBalance(ctx, addr, amt)
+
+}
+
+// GetBalance
+func (c BankCoinTransferrer) GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) int {
+
+	balanceCoin := c.keeper.GetBalance(ctx, addr, denom)
+	return int(balanceCoin.Amount.Int64())
+
+}
+
+// GetSupply
+func (c BankCoinTransferrer) GetSupply(ctx sdk.Context, denom string) int {
+
+	supply := c.keeper.GetSupply(ctx)
+
+	for _, coin := range supply.GetTotal() {
+		if coin.Denom == denom {
+			return int(coin.Amount.Int64())
+		}
+	}
+	return 0
+
 }
 
 func (k Keeper) addToPolicyRegoSecondaryIndex(ctx sdk.Context, policyAddress sdk.AccAddress, entry types.PolicyRegoHistoryEntry) {

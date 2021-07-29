@@ -215,3 +215,42 @@ func (msg MsgMigratePolicy) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{senderAddr}
 
 }
+
+func (msg MsgExecutePolicy) Route() string {
+	return RouterKey
+}
+
+func (msg MsgExecutePolicy) Type() string {
+	return "execute"
+}
+
+func (msg MsgExecutePolicy) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Sender); err != nil {
+		return sdkerrors.Wrap(err, "sender")
+	}
+	if _, err := sdk.AccAddressFromBech32(msg.Policy); err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+
+	if !msg.Funds.IsValid() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "sentFunds")
+	}
+	if !json.Valid(msg.Input) {
+		return sdkerrors.Wrap(ErrInvalid, "input json")
+	}
+	return nil
+}
+
+func (msg MsgExecutePolicy) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+
+}
+
+func (msg MsgExecutePolicy) GetSigners() []sdk.AccAddress {
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil { // should never happen as valid basic rejects invalid addresses
+		panic(err.Error())
+	}
+	return []sdk.AccAddress{senderAddr}
+
+}

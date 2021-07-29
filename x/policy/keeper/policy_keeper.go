@@ -12,7 +12,8 @@ type decoratedKeeper interface {
 	create(ctx sdk.Context, creator sdk.AccAddress, regoCode []byte, source string, entry_points []byte, instantiateAccess *types.AccessConfig, authZ AuthorizationPolicy) (regoID uint64, err error)
 	instantiate(ctx sdk.Context, regoID uint64, creator, admin sdk.AccAddress, ntry_points []byte, label string, deposit sdk.Coins, authZ AuthorizationPolicy) (sdk.AccAddress, error)
 	setPolicyAdmin(ctx sdk.Context, policyAddress, caller, newAdmin sdk.AccAddress, authZ AuthorizationPolicy) error
-	migrate(ctx sdk.Context, contractAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte, authZ AuthorizationPolicy) error
+	migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte, authZ AuthorizationPolicy) error
+	execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error)
 }
 
 type PermissionedKeeper struct {
@@ -48,6 +49,9 @@ func (p PermissionedKeeper) ClearPolicyAdmin(ctx sdk.Context, policyAddress sdk.
 	return p.nested.setPolicyAdmin(ctx, policyAddress, caller, nil, p.authZPolicy)
 }
 
-func (p PermissionedKeeper) Migrate(ctx sdk.Context, contractAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte) error {
-	return p.nested.migrate(ctx, contractAddress, caller, newRegoID, entry_points, p.authZPolicy)
+func (p PermissionedKeeper) Migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte) error {
+	return p.nested.migrate(ctx, policyAddress, caller, newRegoID, entry_points, p.authZPolicy)
+}
+func (p PermissionedKeeper) Execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error) {
+	return p.nested.execute(ctx, policyAddress, caller, entry_point, input, coins)
 }

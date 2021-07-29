@@ -12,7 +12,7 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the Msg service.
 service Msg {
-    // StoreRego to submit Rego code to the system
+  // StoreRego to submit Rego code to the system
   rpc StoreRego(MsgStoreRego) returns (MsgStoreRegoResponse);
   //  Instantiate creates a new smart policy instance for the given code id.
   rpc InstantiatePolicy(MsgInstantiatePolicy)
@@ -21,9 +21,33 @@ service Msg {
   rpc UpdateAdmin(MsgUpdateAdmin) returns (MsgUpdateAdminResponse);
   // ClearAdmin removes any admin stored for a smart policy
   rpc ClearAdmin(MsgClearAdmin) returns (MsgClearAdminResponse);
-   // Migrate runs a code upgrade/ downgrade for a smart policy
-    rpc MigratePolicy(MsgMigratePolicy) returns (MsgMigratePolicyResponse);
-  // UpdateAdmin sets a new   admin for a smart policy
+  // Migrate runs a code upgrade/ downgrade for a smart policy
+  rpc MigratePolicy(MsgMigratePolicy) returns (MsgMigratePolicyResponse);
+  // Execute submits the given message input to a smart policy
+  rpc ExecutePolicy(MsgExecutePolicy) returns (MsgExecutePolicyResponse);
+}
+
+// MsgExecutePolicy submits the given message input to a smart policy
+message MsgExecutePolicy {
+  // Sender is the that actor that signed the messages
+  string sender = 1;
+  // Contract is the address of the smart policy
+  string policy = 2;
+  // Valid entry point
+  string entry_point = 3 ;
+  // Input json encoded message to be passed to the policy
+  bytes input = 4 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+  // Funds coins that are transferred to the policy on execution
+  repeated cosmos.base.v1beta1.Coin funds = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgExecutePolicyResponse returns execution result data.
+message MsgExecutePolicyResponse {
+  // Data contains the json data returned from the smart policy
+  bytes data = 1 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
 }
 
 // MsgStoreRego submit Rego code to the system
@@ -115,3 +139,4 @@ message MsgMigratePolicy {
 
 // MsgMigratePolicyResponse returns policy migration result data.
 message MsgMigratePolicyResponse {}
+

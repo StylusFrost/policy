@@ -8,6 +8,9 @@ import (
 var (
 	DefaultCodespace = ModuleName
 
+	// ErrExecuteFailed error for  execution policy failure
+	ErrExecuteFailed = sdkErrors.Register(DefaultCodespace, 5, "execute rego policy failed")
+
 	// ErrLimit error for content that exceeds a limit
 	ErrLimit = sdkErrors.Register(DefaultCodespace, 13, "exceeds limit")
 
