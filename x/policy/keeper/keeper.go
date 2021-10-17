@@ -35,7 +35,7 @@ type CoinTransferrer interface {
 
 type (
 	Keeper struct {
-		cdc           codec.Marshaler
+		cdc           codec.BinaryCodec
 		storeKey      sdk.StoreKey
 		memKey        sdk.StoreKey
 		paramSpace    paramtypes.Subspace
@@ -46,7 +46,7 @@ type (
 )
 
 func NewKeeper(
-	cdc codec.Marshaler,
+	cdc codec.BinaryCodec,
 	storeKey,
 	memKey sdk.StoreKey,
 	paramSpace paramtypes.Subspace,
@@ -176,7 +176,7 @@ func (k Keeper) create(ctx sdk.Context, creator sdk.AccAddress, regoCode []byte,
 func (k Keeper) storeRegoInfo(ctx sdk.Context, regoID uint64, regoInfo types.RegoInfo) {
 	store := ctx.KVStore(k.storeKey)
 	// 0x01 | regoID (uint64) -> PolicyInfo
-	store.Set(types.GetRegoKey(regoID), k.cdc.MustMarshalBinaryBare(&regoInfo))
+	store.Set(types.GetRegoKey(regoID), k.cdc.MustMarshal(&regoInfo))
 }
 
 func (k Keeper) regoValidateAndCompile(ctx sdk.Context, regoCode []byte, entry_points []string) ([]byte, error) {
@@ -317,7 +317,7 @@ func (k Keeper) GetByteRego(ctx sdk.Context, regoID uint64) ([]byte, error) {
 	if regoInfoBz == nil {
 		return nil, nil
 	}
-	k.cdc.MustUnmarshalBinaryBare(regoInfoBz, &regoInfo)
+	k.cdc.MustUnmarshal(regoInfoBz, &regoInfo)
 
 	return k.GetRegoCode(ctx, regoInfo.RegoHash), nil
 
@@ -329,7 +329,7 @@ func (k Keeper) GetRegoInfo(ctx sdk.Context, regoID uint64) *types.RegoInfo {
 	if regoInfoBz == nil {
 		return nil
 	}
-	k.cdc.MustUnmarshalBinaryBare(regoInfoBz, &regoInfo)
+	k.cdc.MustUnmarshal(regoInfoBz, &regoInfo)
 	return &regoInfo
 }
 
@@ -380,7 +380,7 @@ func (k Keeper) IterateRegoInfos(ctx sdk.Context, cb func(uint64, types.RegoInfo
 	iter := prefixStore.Iterator(nil, nil)
 	for ; iter.Valid(); iter.Next() {
 		var c types.RegoInfo
-		k.cdc.MustUnmarshalBinaryBare(iter.Value(), &c)
+		k.cdc.MustUnmarshal(iter.Value(), &c)
 		// cb returns true to stop early
 		if cb(binary.BigEndian.Uint64(iter.Key()), c) {
 			return
@@ -489,7 +489,7 @@ func NewBankCoinTransferrer(keeper types.BankKeeper) BankCoinTransferrer {
 // TransferCoins transfers coins from source to destination account when coin send was enabled for them and the recipient
 // is not in the blocked address list.
 func (c BankCoinTransferrer) TransferCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error {
-	if err := c.keeper.SendEnabledCoins(ctx, amt...); err != nil {
+	if err := c.keeper.IsSendEnabledCoins(ctx, amt...); err != nil {
 		return err
 	}
 	if c.keeper.BlockedAddr(fromAddr) {
@@ -520,12 +520,10 @@ func (c BankCoinTransferrer) GetBalance(ctx sdk.Context, addr sdk.AccAddress, de
 // GetSupply
 func (c BankCoinTransferrer) GetSupply(ctx sdk.Context, denom string) int {
 
-	supply := c.keeper.GetSupply(ctx)
+	coin := c.keeper.GetSupply(ctx, denom)
 
-	for _, coin := range supply.GetTotal() {
-		if coin.Denom == denom {
-			return int(coin.Amount.Int64())
-		}
+	if coin.Denom == denom {
+		return int(coin.Amount.Int64())
 	}
 	return 0
 
@@ -548,14 +546,14 @@ func (k Keeper) appendToPolicyHistory(ctx sdk.Context, policyAddr sdk.AccAddress
 	for _, e := range newEntries {
 		pos++
 		key := types.GetPolicyRegoHistoryElementKey(policyAddr, pos)
-		store.Set(key, k.cdc.MustMarshalBinaryBare(&e))
+		store.Set(key, k.cdc.MustMarshal(&e))
 	}
 }
 
 // storePolicyInfo persists the PolicyInfo. No secondary index updated here.
 func (k Keeper) storePolicyInfo(ctx sdk.Context, policyAddress sdk.AccAddress, policy *types.PolicyInfo) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.GetPolicyAddressKey(policyAddress), k.cdc.MustMarshalBinaryBare(policy))
+	store.Set(types.GetPolicyAddressKey(policyAddress), k.cdc.MustMarshal(policy))
 }
 
 func (k Keeper) GetPolicyInfo(ctx sdk.Context, policyAddress sdk.AccAddress) *types.PolicyInfo {
@@ -565,7 +563,7 @@ func (k Keeper) GetPolicyInfo(ctx sdk.Context, policyAddress sdk.AccAddress) *ty
 	if policyBz == nil {
 		return nil
 	}
-	k.cdc.MustUnmarshalBinaryBare(policyBz, &policy)
+	k.cdc.MustUnmarshal(policyBz, &policy)
 	return &policy
 }
 
@@ -624,6 +622,27 @@ func (k Keeper) migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sd
 
 	return nil
 }
+func (k Keeper) refund(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, coins sdk.Coins, authZ AuthorizationPolicy) error {
+
+	// TODO: GAS COST
+
+	policyInfo := k.GetPolicyInfo(ctx, policyAddress)
+	if policyInfo == nil {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown policy")
+	}
+	if !authZ.CanRefundPolicy(policyInfo.AdminAddr(), caller) {
+		return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not refund")
+	}
+
+	// refund coins
+	if !coins.IsZero() {
+		if err := k.bank.TransferCoins(ctx, policyAddress, caller, coins); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 // removeFromPolicyCodeSecondaryIndex removes element to the index for policies-by-regoid queries
 func (k Keeper) removeFromPolicyRegoSecondaryIndex(ctx sdk.Context, policyAddress sdk.AccAddress, entry types.PolicyRegoHistoryEntry) {
@@ -638,7 +657,7 @@ func (k Keeper) getLastPolicyHistoryEntry(ctx sdk.Context, policyAddr sdk.AccAdd
 		// all policys have a history
 		panic(fmt.Sprintf("no history for %s", policyAddr.String()))
 	}
-	k.cdc.MustUnmarshalBinaryBare(iter.Value(), &r)
+	k.cdc.MustUnmarshal(iter.Value(), &r)
 	return r
 }
 
@@ -648,7 +667,7 @@ func (k Keeper) GetPolicyHistory(ctx sdk.Context, policyAddr sdk.AccAddress) []t
 	iter := prefixStore.Iterator(nil, nil)
 	for ; iter.Valid(); iter.Next() {
 		var e types.PolicyRegoHistoryEntry
-		k.cdc.MustUnmarshalBinaryBare(iter.Value(), &e)
+		k.cdc.MustUnmarshal(iter.Value(), &e)
 		r = append(r, e)
 	}
 	return r

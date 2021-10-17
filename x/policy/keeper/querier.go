@@ -18,13 +18,13 @@ import (
 var _ types.QueryServer = &grpcQuerier{}
 
 type grpcQuerier struct {
-	cdc           codec.Marshaler
+	cdc           codec.BinaryCodec
 	storeKey      sdk.StoreKey
 	keeper        types.ViewKeeper
 	queryGasLimit sdk.Gas
 }
 
-func NewGrpcQuerier(cdc codec.Marshaler, storeKey sdk.StoreKey, keeper types.ViewKeeper, queryGasLimit sdk.Gas) *grpcQuerier {
+func NewGrpcQuerier(cdc codec.BinaryCodec, storeKey sdk.StoreKey, keeper types.ViewKeeper, queryGasLimit sdk.Gas) *grpcQuerier {
 	return &grpcQuerier{cdc: cdc, storeKey: storeKey, keeper: keeper, queryGasLimit: queryGasLimit}
 }
 
@@ -58,7 +58,7 @@ func (q grpcQuerier) Regos(c context.Context, req *types.QueryRegosRequest) (*ty
 	pageRes, err := query.FilteredPaginate(prefixStore, req.Pagination, func(key []byte, value []byte, accumulate bool) (bool, error) {
 		if accumulate {
 			var c types.RegoInfo
-			if err := q.cdc.UnmarshalBinaryBare(value, &c); err != nil {
+			if err := q.cdc.Unmarshal(value, &c); err != nil {
 				return false, err
 			}
 
@@ -176,7 +176,7 @@ func (q grpcQuerier) PolicyHistory(c context.Context, req *types.QueryPolicyHist
 	pageRes, err := query.FilteredPaginate(prefixStore, req.Pagination, func(key []byte, value []byte, accumulate bool) (bool, error) {
 		if accumulate {
 			var e types.PolicyRegoHistoryEntry
-			if err := q.cdc.UnmarshalBinaryBare(value, &e); err != nil {
+			if err := q.cdc.Unmarshal(value, &e); err != nil {
 				return false, err
 			}
 			e.Updated = nil // redact

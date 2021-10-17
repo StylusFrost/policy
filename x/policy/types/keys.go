@@ -57,13 +57,13 @@ func GetRegoHashKey(regoHash []byte) []byte {
 	return append(RegoHashKeyPrefix, regoHash...)
 }
 
-
 // GetPolicyByCreatedSecondaryIndexKey returns the key for the secondary index:
 // `<prefix><regoID><created/last-migrated><policyAddr>`
 func GetPolicyByCreatedSecondaryIndexKey(policyAddr sdk.AccAddress, c PolicyRegoHistoryEntry) []byte {
 	prefix := GetPolicyByRegoIDSecondaryIndexPrefix(c.RegoID)
 	prefixLen := len(prefix)
-	r := make([]byte, prefixLen+AbsoluteTxPositionLen+sdk.AddrLen)
+	policyAddrInvr := sdk.CopyBytes(policyAddr)
+	r := make([]byte, prefixLen+AbsoluteTxPositionLen+len(policyAddrInvr))
 	copy(r[0:], prefix)
 	copy(r[prefixLen:], c.Updated.Bytes())
 	copy(r[prefixLen+AbsoluteTxPositionLen:], policyAddr)
@@ -83,7 +83,8 @@ func GetPolicyByRegoIDSecondaryIndexPrefix(regoID uint64) []byte {
 // GetPolicyRegoHistoryElementPrefix returns the key prefix for a policy rego history entry: `<prefix><policyAddr>`
 func GetPolicyRegoHistoryElementPrefix(policyAddr sdk.AccAddress) []byte {
 	prefixLen := len(PolicyRegoHistoryElementPrefix)
-	r := make([]byte, prefixLen+sdk.AddrLen)
+	policyAddrInvr := sdk.CopyBytes(policyAddr)
+	r := make([]byte, prefixLen+len(policyAddrInvr))
 	copy(r[0:], PolicyRegoHistoryElementPrefix)
 	copy(r[prefixLen:], policyAddr)
 	return r

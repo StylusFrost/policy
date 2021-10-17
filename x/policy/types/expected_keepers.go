@@ -3,7 +3,6 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/exported"
 )
 
 // AccountKeeper defines a subset of methods implemented by the cosmos-sdk account keeper
@@ -18,10 +17,10 @@ type AccountKeeper interface {
 
 // BankKeeper defines a subset of methods implemented by the cosmos-sdk bank keeper
 type BankKeeper interface {
-	SendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
+	IsSendEnabledCoins(ctx sdk.Context, coins ...sdk.Coin) error
 	BlockedAddr(addr sdk.AccAddress) bool
 	SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
 	HasBalance(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coin) bool
 	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
-	GetSupply(ctx sdk.Context) exported.SupplyI
+	GetSupply(ctx sdk.Context, denom string) sdk.Coin
 }

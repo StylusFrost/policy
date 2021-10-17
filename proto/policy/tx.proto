@@ -25,6 +25,21 @@ service Msg {
   rpc MigratePolicy(MsgMigratePolicy) returns (MsgMigratePolicyResponse);
   // Execute submits the given message input to a smart policy
   rpc ExecutePolicy(MsgExecutePolicy) returns (MsgExecutePolicyResponse);
+   // Refund amount coin from a smart policy
+  rpc RefundPolicy(MsgRefundPolicy) returns (MsgRefundPolicyResponse);
+}
+
+// Refund amount coins from a smart policy
+message MsgRefundPolicy {
+  // Sender is the that actor that signed the messages
+  string sender = 1;
+  // Contract is the address of the smart policy
+  string policy = 2;
+  // Refunds coins that are transferred from policy
+  repeated cosmos.base.v1beta1.Coin refunds = 3 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // MsgExecutePolicy submits the given message input to a smart policy
@@ -49,6 +64,8 @@ message MsgExecutePolicyResponse {
   // Data contains the json data returned from the smart policy
   bytes data = 1 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
 }
+// MsgRefundPolicyResponse returns empty data
+message MsgRefundPolicyResponse {}
 
 // MsgStoreRego submit Rego code to the system
 message MsgStoreRego {

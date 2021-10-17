@@ -52,8 +52,35 @@ func GetTxCmd() *cobra.Command {
 		ClearPolicyAdminCmd(),
 		MigratePolicyCmd(),
 		ExecutePolicyCmd(),
+		RefundPolicyCmd(),
 	)
 	return txCmd
+}
+
+// RefundPolicyCmd will refund coins from a smart Policy
+func RefundPolicyCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "refund [policy_addr_bech32] --amount [coins,optional]",
+		Short:   "Refund coins from a rego policy",
+		Aliases: []string{"run", "call", "refund", "rf", "r"},
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+
+			msg, err := parseRefundArgs(args[0], clientCtx.GetFromAddress(), cmd.Flags())
+			if err != nil {
+				return err
+			}
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	cmd.Flags().String(flagAmount, "", "Coins to refund from the policy along with command")
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
 }
 
 // ExecutePolicyCmd will instantiate a policy from previously uploaded code.
@@ -81,6 +108,25 @@ func ExecutePolicyCmd() *cobra.Command {
 	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
+
+func parseRefundArgs(policyAddr string, sender sdk.AccAddress, flags *flag.FlagSet) (types.MsgRefundPolicy, error) {
+	amountStr, err := flags.GetString(flagAmount)
+	if err != nil {
+		return types.MsgRefundPolicy{}, fmt.Errorf("amount: %s", err)
+	}
+
+	amount, err := sdk.ParseCoinsNormalized(amountStr)
+	if err != nil {
+		return types.MsgRefundPolicy{}, err
+	}
+
+	return types.MsgRefundPolicy{
+		Sender:  sender.String(),
+		Policy:  policyAddr,
+		Refunds: amount,
+	}, nil
+}
+
 func parseExecuteArgs(policyAddr string, entry_point string, inputMsg string, sender sdk.AccAddress, flags *flag.FlagSet) (types.MsgExecutePolicy, error) {
 	amountStr, err := flags.GetString(flagAmount)
 	if err != nil {

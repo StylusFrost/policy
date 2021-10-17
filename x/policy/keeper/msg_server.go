@@ -20,6 +20,31 @@ func NewMsgServerImpl(k types.PolicyOpsKeeper) types.MsgServer {
 	return &msgServer{keeper: k}
 }
 
+func (m msgServer) RefundPolicy(goCtx context.Context, msg *types.MsgRefundPolicy) (*types.MsgRefundPolicyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "sender")
+	}
+	contractAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "contract")
+	}
+
+	if err := m.keeper.Refund(ctx, contractAddr, senderAddr, msg.Refunds); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
+		sdk.NewAttribute(types.AttributeKeyPolicyAddr, msg.Policy),
+	))
+
+	return &types.MsgRefundPolicyResponse{}, nil
+}
+
 func (m msgServer) ExecutePolicy(goCtx context.Context, msg *types.MsgExecutePolicy) (*types.MsgExecutePolicyResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	senderAddr, err := sdk.AccAddressFromBech32(msg.Sender)

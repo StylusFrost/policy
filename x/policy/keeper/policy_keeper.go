@@ -14,6 +14,7 @@ type decoratedKeeper interface {
 	setPolicyAdmin(ctx sdk.Context, policyAddress, caller, newAdmin sdk.AccAddress, authZ AuthorizationPolicy) error
 	migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte, authZ AuthorizationPolicy) error
 	execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error)
+	refund(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, coins sdk.Coins, authZ AuthorizationPolicy) error
 }
 
 type PermissionedKeeper struct {
@@ -54,4 +55,7 @@ func (p PermissionedKeeper) Migrate(ctx sdk.Context, policyAddress sdk.AccAddres
 }
 func (p PermissionedKeeper) Execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error) {
 	return p.nested.execute(ctx, policyAddress, caller, entry_point, input, coins)
+}
+func (p PermissionedKeeper) Refund(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, coins sdk.Coins) error {
+	return p.nested.refund(ctx, policyAddress, caller, coins, p.authZPolicy)
 }
