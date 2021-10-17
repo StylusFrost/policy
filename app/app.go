@@ -89,6 +89,7 @@ import (
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 	"github.com/StylusFrost/policy/docs"
 	"github.com/StylusFrost/policy/x/policy"
+	policyclient "github.com/StylusFrost/policy/x/policy/client"
 	policykeeper "github.com/StylusFrost/policy/x/policy/keeper"
 	policytypes "github.com/StylusFrost/policy/x/policy/types"
 )
@@ -97,7 +98,7 @@ const (
 	Name = "policy"
 )
 
-// this line is used by starport scaffolding # stargate/wasm/app/enabledProposals
+// this line is used by starport scaffolding # stargate/app/enabledProposals
 
 func getGovProposalHandlers() []govclient.ProposalHandler {
 	var govProposalHandlers []govclient.ProposalHandler
@@ -109,6 +110,8 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		upgradeclient.ProposalHandler,
 		upgradeclient.CancelProposalHandler,
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
+		policyclient.StoreRegoProposalHandler,
+		policyclient.ProposalInstantiatePolicyHandler,
 	)
 
 	return govProposalHandlers
@@ -308,6 +311,16 @@ func New(
 	)
 
 	// ... other modules keepers
+	// this line is used by starport scaffolding # stargate/app/keeperDefinition
+	app.PolicyKeeper = *policykeeper.NewKeeper(
+		appCodec,
+		keys[policytypes.StoreKey],
+		keys[policytypes.MemStoreKey],
+		app.GetSubspace(policytypes.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
+	)
+	policyModule := policy.NewAppModule(appCodec, &app.PolicyKeeper)
 
 	// Create IBC Keeper
 	app.IBCKeeper = ibckeeper.NewKeeper(
@@ -320,7 +333,8 @@ func New(
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
+		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
+		AddRoute(policytypes.RouterKey, policykeeper.NewPolicyProposalHandler(app.PolicyKeeper, policytypes.EnableAllProposals))
 
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
@@ -341,17 +355,6 @@ func New(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
 		&stakingKeeper, govRouter,
 	)
-
-	// this line is used by starport scaffolding # stargate/app/keeperDefinition
-	app.PolicyKeeper = *policykeeper.NewKeeper(
-		appCodec,
-		keys[policytypes.StoreKey],
-		keys[policytypes.MemStoreKey],
-		app.GetSubspace(policytypes.ModuleName),
-		app.AccountKeeper,
-		app.BankKeeper,
-	)
-	policyModule := policy.NewAppModule(appCodec, &app.PolicyKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()

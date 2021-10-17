@@ -69,7 +69,7 @@ func (msg MsgInstantiatePolicy) ValidateBasic() error {
 	}
 
 	if msg.RegoID == 0 {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "code id is required")
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "rego id is required")
 	}
 
 	if err := validateLabel(msg.Label); err != nil {

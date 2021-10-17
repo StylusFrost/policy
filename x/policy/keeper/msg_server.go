@@ -66,7 +66,7 @@ func (m msgServer) ExecutePolicy(goCtx context.Context, msg *types.MsgExecutePol
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		sdk.NewAttribute(types.AttributeKeySigner, msg.Sender),
 		sdk.NewAttribute(types.AttributeKeyPolicyAddr, msg.Policy),
-		sdk.NewAttribute(types.AttributeResultDataHex, hex.EncodeToString(data)),
+		sdk.NewAttribute(types.AttributeKeyResultDataHex, hex.EncodeToString(data)),
 	))
 
 	return &types.MsgExecutePolicyResponse{

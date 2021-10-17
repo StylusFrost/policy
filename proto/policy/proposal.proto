@@ -1,0 +1,55 @@
+syntax = "proto3";
+package StylusFrost.policy.policy;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "policy/types.proto";
+
+option go_package = "github.com/StylusFrost/policy/x/policy/types";
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.equal_all) = true;
+
+// StoreRegoProposal gov proposal content type to submit REGO code to the system
+message StoreRegoProposal {
+  // Title is a short summary
+  string title = 1;
+  // Description is a human readable text
+  string description = 2;
+  // RunAs is the address that is passed to the policy's environment as sender
+  string run_as = 3;
+  // REGOByteCode can be raw or gzip compressed
+  bytes rego_byte_code = 4 [ (gogoproto.customname) = "REGOByteCode" ];
+  // Valid entry points json encoded 
+  bytes entry_points = 5 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+  // Source is a valid absolute HTTPS URI to the policy's source code,
+  // optional
+  string source = 6;
+  // InstantiatePermission access control to apply on policy creation,
+  // optional
+  AccessConfig instantiate_permission = 7;
+}
+
+// InstantiatePolicyProposal gov proposal content type to instantiate a
+// contract.
+message InstantiatePolicyProposal {
+  // Title is a short summary
+  string title = 1;
+  // Description is a human readable text
+  string description = 2;
+  // RunAs is the address that is passed to the policy's environment as sender
+  string run_as = 3;
+  // Admin is an optional address that can execute migrations
+  string admin = 4;
+  // RegoID is the reference to the stored REGO code
+  uint64 rego_id = 5 [ (gogoproto.customname) = "RegoID" ];
+  // Label is optional metadata to be stored with a policy instance.
+  string label = 6;
+   // Valid entry points json encoded 
+  bytes entry_points = 7 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
+   // Funds coins that are transferred to the policy on instantiation
+  repeated cosmos.base.v1beta1.Coin funds = 8 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}

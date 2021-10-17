@@ -5,6 +5,7 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	// this line is used by starport scaffolding # 1
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
@@ -19,6 +20,9 @@ func RegisterLegacyAminoRegoc(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgMigratePolicy{}, "policy/MsgMigratePolicy", nil)
 	cdc.RegisterConcrete(&MsgExecutePolicy{}, "policy/MsgExecutePolicy", nil)
 	cdc.RegisterConcrete(&MsgRefundPolicy{}, "policy/MsgRefundPolicy", nil)
+
+	cdc.RegisterConcrete(&StoreRegoProposal{}, "policy/StoreRegoProposal", nil)
+	cdc.RegisterConcrete(&InstantiatePolicyProposal{}, "policy/InstantiatePolicyProposal", nil)
 }
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
@@ -35,6 +39,11 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgMigratePolicy{},
 		&MsgExecutePolicy{},
 		&MsgRefundPolicy{},
+	)
+	registry.RegisterImplementations(
+		(*govtypes.Content)(nil),
+		&StoreRegoProposal{},
+		&InstantiatePolicyProposal{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

@@ -35,6 +35,8 @@ const (
 	flagInstantiateByAddress   = "instantiate-only-address"
 	flagLabel                  = "label"
 	flagAdmin                  = "admin"
+	flagRunAs                  = "run-as"
+	flagProposalType           = "type"
 )
 
 func GetTxCmd() *cobra.Command {
