@@ -24,6 +24,8 @@ func RegisterLegacyAminoRegoc(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&StoreRegoProposal{}, "policy/StoreRegoProposal", nil)
 	cdc.RegisterConcrete(&InstantiatePolicyProposal{}, "policy/InstantiatePolicyProposal", nil)
 	cdc.RegisterConcrete(&MigratePolicyProposal{}, "policy/MigratePolicyProposal", nil)
+	cdc.RegisterConcrete(&UpdateAdminProposal{}, "policy/UpdateAdminProposal", nil)
+	cdc.RegisterConcrete(&ClearAdminProposal{}, "policy/ClearAdminProposal", nil)
 }
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
@@ -46,6 +48,8 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&StoreRegoProposal{},
 		&InstantiatePolicyProposal{},
 		&MigratePolicyProposal{},
+		&UpdateAdminProposal{},
+		&ClearAdminProposal{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

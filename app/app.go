@@ -112,7 +112,9 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		// this line is used by starport scaffolding # stargate/app/govProposalHandler
 		policyclient.StoreRegoProposalHandler,
 		policyclient.ProposalInstantiatePolicyHandler,
-		policyclient.ProposalMigratePolicyHandlerHandler,
+		policyclient.ProposalMigratePolicyHandler,
+		policyclient.ProposalUpdatePolicyAdminHandler,
+		policyclient.ProposalClearPolicyAdminHandler,
 	)
 
 	return govProposalHandlers

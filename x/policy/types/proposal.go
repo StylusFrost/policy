@@ -17,6 +17,8 @@ const (
 	ProposalTypeStoreRego         ProposalType = "StoreRego"
 	ProposalTypeInstantiatePolicy ProposalType = "InstantiatePolicy"
 	ProposalTypeMigratePolicy     ProposalType = "MigratePolicy"
+	ProposalTypeUpdateAdmin       ProposalType = "UpdateAdmin"
+	ProposalTypeClearAdmin        ProposalType = "ClearAdmin"
 )
 
 // DisableAllProposals contains no policy gov types.
@@ -27,6 +29,8 @@ var EnableAllProposals = []ProposalType{
 	ProposalTypeStoreRego,
 	ProposalTypeInstantiatePolicy,
 	ProposalTypeMigratePolicy,
+	ProposalTypeUpdateAdmin,
+	ProposalTypeClearAdmin,
 }
 
 // ConvertToProposals maps each key to a ProposalType and returns a typed list.
@@ -51,11 +55,14 @@ func init() { // register new content types with the sdk
 	govtypes.RegisterProposalType(string(ProposalTypeStoreRego))
 	govtypes.RegisterProposalType(string(ProposalTypeInstantiatePolicy))
 	govtypes.RegisterProposalType(string(ProposalTypeMigratePolicy))
+	govtypes.RegisterProposalType(string(ProposalTypeUpdateAdmin))
+	govtypes.RegisterProposalType(string(ProposalTypeClearAdmin))
 
 	govtypes.RegisterProposalTypeCodec(&StoreRegoProposal{}, "policy/StoreRegoProposal")
 	govtypes.RegisterProposalTypeCodec(&InstantiatePolicyProposal{}, "policy/InstantiatePolicyProposal")
 	govtypes.RegisterProposalTypeCodec(&MigratePolicyProposal{}, "policy/MigratePolicyProposal")
-
+	govtypes.RegisterProposalTypeCodec(&UpdateAdminProposal{}, "policy/UpdateAdminProposal")
+	govtypes.RegisterProposalTypeCodec(&ClearAdminProposal{}, "policy/ClearAdminProposal")
 }
 
 // ProposalRoute returns the routing key of a parameter change proposal.
@@ -278,6 +285,74 @@ func (p InstantiatePolicyProposal) MarshalYAML() (interface{}, error) {
 		EntryPoints: string(p.EntryPoints),
 		Funds:       p.Funds,
 	}, nil
+}
+
+// ProposalRoute returns the routing key of a parameter change proposal.
+func (p UpdateAdminProposal) ProposalRoute() string { return RouterKey }
+
+// GetTitle returns the title of the proposal
+func (p *UpdateAdminProposal) GetTitle() string { return p.Title }
+
+// GetDescription returns the human readable description of the proposal
+func (p UpdateAdminProposal) GetDescription() string { return p.Description }
+
+// ProposalType returns the type
+func (p UpdateAdminProposal) ProposalType() string { return string(ProposalTypeUpdateAdmin) }
+
+// ValidateBasic validates the proposal
+func (p UpdateAdminProposal) ValidateBasic() error {
+	if err := validateProposalCommons(p.Title, p.Description); err != nil {
+		return err
+	}
+	if _, err := sdk.AccAddressFromBech32(p.Policy); err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	if _, err := sdk.AccAddressFromBech32(p.NewAdmin); err != nil {
+		return sdkerrors.Wrap(err, "new admin")
+	}
+	return nil
+}
+
+// String implements the Stringer interface.
+func (p UpdateAdminProposal) String() string {
+	return fmt.Sprintf(`Update Policy Admin Proposal:
+  Title:       %s
+  Description: %s
+  Policy:    %s
+  New Admin:   %s
+`, p.Title, p.Description, p.Policy, p.NewAdmin)
+}
+
+// ProposalRoute returns the routing key of a parameter change proposal.
+func (p ClearAdminProposal) ProposalRoute() string { return RouterKey }
+
+// GetTitle returns the title of the proposal
+func (p *ClearAdminProposal) GetTitle() string { return p.Title }
+
+// GetDescription returns the human readable description of the proposal
+func (p ClearAdminProposal) GetDescription() string { return p.Description }
+
+// ProposalType returns the type
+func (p ClearAdminProposal) ProposalType() string { return string(ProposalTypeClearAdmin) }
+
+// ValidateBasic validates the proposal
+func (p ClearAdminProposal) ValidateBasic() error {
+	if err := validateProposalCommons(p.Title, p.Description); err != nil {
+		return err
+	}
+	if _, err := sdk.AccAddressFromBech32(p.Policy); err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	return nil
+}
+
+// String implements the Stringer interface.
+func (p ClearAdminProposal) String() string {
+	return fmt.Sprintf(`Clear Policy Admin Proposal:
+  Title:       %s
+  Description: %s
+  Policy:    %s
+`, p.Title, p.Description, p.Policy)
 }
 
 func validateProposalCommons(title, description string) error {

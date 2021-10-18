@@ -167,6 +167,90 @@ func MigrateProposalHandler(cliCtx client.Context) govrest.ProposalRESTHandler {
 	}
 }
 
+type UpdateAdminJsonReq struct {
+	BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+
+	Title       string `json:"title" yaml:"title"`
+	Description string `json:"description" yaml:"description"`
+
+	Proposer string    `json:"proposer" yaml:"proposer"`
+	Deposit  sdk.Coins `json:"deposit" yaml:"deposit"`
+
+	NewAdmin string `json:"new_admin" yaml:"new_admin"`
+	Policy   string `json:"policy" yaml:"policy"`
+}
+
+func (s UpdateAdminJsonReq) Content() govtypes.Content {
+	return &types.UpdateAdminProposal{
+		Title:       s.Title,
+		Description: s.Description,
+		Policy:      s.Policy,
+		NewAdmin:    s.NewAdmin,
+	}
+}
+func (s UpdateAdminJsonReq) GetProposer() string {
+	return s.Proposer
+}
+func (s UpdateAdminJsonReq) GetDeposit() sdk.Coins {
+	return s.Deposit
+}
+func (s UpdateAdminJsonReq) GetBaseReq() rest.BaseReq {
+	return s.BaseReq
+}
+func UpdatePolicyAdminProposalHandler(cliCtx client.Context) govrest.ProposalRESTHandler {
+	return govrest.ProposalRESTHandler{
+		SubRoute: "policy_update_admin",
+		Handler: func(w http.ResponseWriter, r *http.Request) {
+			var req UpdateAdminJsonReq
+			if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
+				return
+			}
+			toStdTxResponse(cliCtx, w, req)
+		},
+	}
+}
+
+type ClearAdminJsonReq struct {
+	BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+
+	Title       string `json:"title" yaml:"title"`
+	Description string `json:"description" yaml:"description"`
+
+	Proposer string    `json:"proposer" yaml:"proposer"`
+	Deposit  sdk.Coins `json:"deposit" yaml:"deposit"`
+
+	Policy string `json:"policy" yaml:"policy"`
+}
+
+func (s ClearAdminJsonReq) Content() govtypes.Content {
+	return &types.ClearAdminProposal{
+		Title:       s.Title,
+		Description: s.Description,
+		Policy:      s.Policy,
+	}
+}
+func (s ClearAdminJsonReq) GetProposer() string {
+	return s.Proposer
+}
+func (s ClearAdminJsonReq) GetDeposit() sdk.Coins {
+	return s.Deposit
+}
+func (s ClearAdminJsonReq) GetBaseReq() rest.BaseReq {
+	return s.BaseReq
+}
+func ClearPolicyAdminProposalHandler(cliCtx client.Context) govrest.ProposalRESTHandler {
+	return govrest.ProposalRESTHandler{
+		SubRoute: "policy_clear_admin",
+		Handler: func(w http.ResponseWriter, r *http.Request) {
+			var req ClearAdminJsonReq
+			if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
+				return
+			}
+			toStdTxResponse(cliCtx, w, req)
+		},
+	}
+}
+
 type policyProposalData interface {
 	Content() govtypes.Content
 	GetProposer() string

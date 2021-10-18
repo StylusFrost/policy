@@ -34,10 +34,45 @@ func NewPolicyProposalHandlerX(k types.PolicyOpsKeeper, enabledProposalTypes []t
 			return handleInstantiateProposal(ctx, k, *c)
 		case *types.MigratePolicyProposal:
 			return handleMigrateProposal(ctx, k, *c)
+		case *types.UpdateAdminProposal:
+			return handleUpdateAdminProposal(ctx, k, *c)
+		case *types.ClearAdminProposal:
+			return handleClearAdminProposal(ctx, k, *c)
 		default:
 			return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized policy proposal content type: %T", c)
 		}
 	}
+}
+
+func handleUpdateAdminProposal(ctx sdk.Context, k types.PolicyOpsKeeper, p types.UpdateAdminProposal) error {
+	if err := p.ValidateBasic(); err != nil {
+		return err
+	}
+	policyAddr, err := sdk.AccAddressFromBech32(p.Policy)
+	if err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	newAdminAddr, err := sdk.AccAddressFromBech32(p.NewAdmin)
+	if err != nil {
+		return sdkerrors.Wrap(err, "run as address")
+	}
+
+	return k.UpdatePolicyAdmin(ctx, policyAddr, nil, newAdminAddr)
+}
+
+func handleClearAdminProposal(ctx sdk.Context, k types.PolicyOpsKeeper, p types.ClearAdminProposal) error {
+	if err := p.ValidateBasic(); err != nil {
+		return err
+	}
+
+	policyAddr, err := sdk.AccAddressFromBech32(p.Policy)
+	if err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	if err := k.ClearPolicyAdmin(ctx, policyAddr, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func handleStoreCodeRego(ctx sdk.Context, k types.PolicyOpsKeeper, p types.StoreRegoProposal) error {

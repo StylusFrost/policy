@@ -69,3 +69,26 @@ message MigratePolicyProposal {
   // Valid entry points json encoded 
   bytes entry_points = 6 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
 }
+
+// UpdateAdminProposal gov proposal content type to set an admin for a policy.
+message UpdateAdminProposal {
+  // Title is a short summary
+  string title = 1;
+  // Description is a human readable text
+  string description = 2;
+  // NewAdmin address to be set
+  string new_admin = 3 [ (gogoproto.moretags) = "yaml:\"new_admin\"" ];
+  // Policy is the address of the smart policy
+  string policy = 4;
+}
+
+// ClearAdminProposal gov proposal content type to clear the admin of a
+// policy.
+message ClearAdminProposal {
+  // Title is a short summary
+  string title = 1;
+  // Description is a human readable text
+  string description = 2;
+  // Policy is the address of the smart policy
+  string policy = 3;
+}
