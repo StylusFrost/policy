@@ -119,6 +119,54 @@ func InstantiateProposalHandler(cliCtx client.Context) govrest.ProposalRESTHandl
 	}
 }
 
+type MigrateProposalJsonReq struct {
+	BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+
+	Title       string `json:"title" yaml:"title"`
+	Description string `json:"description" yaml:"description"`
+
+	Proposer string    `json:"proposer" yaml:"proposer"`
+	Deposit  sdk.Coins `json:"deposit" yaml:"deposit"`
+
+	Policy      string          `json:"policy" yaml:"policy"`
+	RegoID      uint64          `json:"rego_id" yaml:"rego_id"`
+	EntryPoints json.RawMessage `json:"entry_points" yaml:"entry_points"`
+	// RunAs is the role that is passed to the policy's environment
+	RunAs string `json:"run_as" yaml:"run_as"`
+}
+
+func (s MigrateProposalJsonReq) Content() govtypes.Content {
+	return &types.MigratePolicyProposal{
+		Title:       s.Title,
+		Description: s.Description,
+		Policy:      s.Policy,
+		RegoID:      s.RegoID,
+		EntryPoints: s.EntryPoints,
+		RunAs:       s.RunAs,
+	}
+}
+func (s MigrateProposalJsonReq) GetProposer() string {
+	return s.Proposer
+}
+func (s MigrateProposalJsonReq) GetDeposit() sdk.Coins {
+	return s.Deposit
+}
+func (s MigrateProposalJsonReq) GetBaseReq() rest.BaseReq {
+	return s.BaseReq
+}
+func MigrateProposalHandler(cliCtx client.Context) govrest.ProposalRESTHandler {
+	return govrest.ProposalRESTHandler{
+		SubRoute: "policy_migrate",
+		Handler: func(w http.ResponseWriter, r *http.Request) {
+			var req MigrateProposalJsonReq
+			if !rest.ReadRESTReq(w, r, cliCtx.LegacyAmino, &req) {
+				return
+			}
+			toStdTxResponse(cliCtx, w, req)
+		},
+	}
+}
+
 type policyProposalData interface {
 	Content() govtypes.Content
 	GetProposer() string

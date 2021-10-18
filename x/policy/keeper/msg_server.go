@@ -26,12 +26,12 @@ func (m msgServer) RefundPolicy(goCtx context.Context, msg *types.MsgRefundPolic
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "sender")
 	}
-	contractAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	policyAddr, err := sdk.AccAddressFromBech32(msg.Policy)
 	if err != nil {
-		return nil, sdkerrors.Wrap(err, "contract")
+		return nil, sdkerrors.Wrap(err, "policy")
 	}
 
-	if err := m.keeper.Refund(ctx, contractAddr, senderAddr, msg.Refunds); err != nil {
+	if err := m.keeper.Refund(ctx, policyAddr, senderAddr, msg.Refunds); err != nil {
 		return nil, err
 	}
 
@@ -51,12 +51,12 @@ func (m msgServer) ExecutePolicy(goCtx context.Context, msg *types.MsgExecutePol
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "sender")
 	}
-	contractAddr, err := sdk.AccAddressFromBech32(msg.Policy)
+	policyAddr, err := sdk.AccAddressFromBech32(msg.Policy)
 	if err != nil {
-		return nil, sdkerrors.Wrap(err, "contract")
+		return nil, sdkerrors.Wrap(err, "policy")
 	}
 
-	data, err := m.keeper.Execute(ctx, contractAddr, senderAddr, msg.EntryPoint, msg.Input, msg.Funds)
+	data, err := m.keeper.Execute(ctx, policyAddr, senderAddr, msg.EntryPoint, msg.Input, msg.Funds)
 	if err != nil {
 		return nil, err
 	}

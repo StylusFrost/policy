@@ -164,7 +164,7 @@ func (q grpcQuerier) PolicyHistory(c context.Context, req *types.QueryPolicyHist
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	contractAddr, err := sdk.AccAddressFromBech32(req.Address)
+	policyAddr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func (q grpcQuerier) PolicyHistory(c context.Context, req *types.QueryPolicyHist
 	ctx := sdk.UnwrapSDKContext(c)
 	r := make([]types.PolicyRegoHistoryEntry, 0)
 
-	prefixStore := prefix.NewStore(ctx.KVStore(q.storeKey), types.GetPolicyRegoHistoryElementPrefix(contractAddr))
+	prefixStore := prefix.NewStore(ctx.KVStore(q.storeKey), types.GetPolicyRegoHistoryElementPrefix(policyAddr))
 	pageRes, err := query.FilteredPaginate(prefixStore, req.Pagination, func(key []byte, value []byte, accumulate bool) (bool, error) {
 		if accumulate {
 			var e types.PolicyRegoHistoryEntry

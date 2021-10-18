@@ -33,7 +33,7 @@ service Msg {
 message MsgRefundPolicy {
   // Sender is the that actor that signed the messages
   string sender = 1;
-  // Contract is the address of the smart policy
+  // Policy is the address of the smart policy
   string policy = 2;
   // Refunds coins that are transferred from policy
   repeated cosmos.base.v1beta1.Coin refunds = 3 [
@@ -46,7 +46,7 @@ message MsgRefundPolicy {
 message MsgExecutePolicy {
   // Sender is the that actor that signed the messages
   string sender = 1;
-  // Contract is the address of the smart policy
+  // Policy is the address of the smart policy
   string policy = 2;
   // Valid entry point
   string entry_point = 3 ;

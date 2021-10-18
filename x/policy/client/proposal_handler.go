@@ -8,3 +8,4 @@ import (
 
 var StoreRegoProposalHandler = govclient.NewProposalHandler(cli.StoreRegoProposalCmd, rest.StoreRegoProposalHandler)
 var ProposalInstantiatePolicyHandler = govclient.NewProposalHandler(cli.ProposalInstantiatePolicyCmd, rest.InstantiateProposalHandler)
+var ProposalMigratePolicyHandlerHandler = govclient.NewProposalHandler(cli.ProposalMigratePolicyCmd, rest.MigrateProposalHandler)

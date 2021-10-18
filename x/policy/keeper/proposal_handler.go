@@ -32,7 +32,8 @@ func NewPolicyProposalHandlerX(k types.PolicyOpsKeeper, enabledProposalTypes []t
 			return handleStoreCodeRego(ctx, k, *c)
 		case *types.InstantiatePolicyProposal:
 			return handleInstantiateProposal(ctx, k, *c)
-
+		case *types.MigratePolicyProposal:
+			return handleMigrateProposal(ctx, k, *c)
 		default:
 			return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized policy proposal content type: %T", c)
 		}
@@ -84,4 +85,31 @@ func handleInstantiateProposal(ctx sdk.Context, k types.PolicyOpsKeeper, p types
 		sdk.NewAttribute(types.AttributeKeyPolicyAddr, policyAddress.String()),
 	))
 	return nil
+}
+
+func handleMigrateProposal(ctx sdk.Context, k types.PolicyOpsKeeper, p types.MigratePolicyProposal) error {
+	if err := p.ValidateBasic(); err != nil {
+		return err
+	}
+
+	policyAddr, err := sdk.AccAddressFromBech32(p.Policy)
+	if err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	runAsAddr, err := sdk.AccAddressFromBech32(p.RunAs)
+	if err != nil {
+		return sdkerrors.Wrap(err, "run as address")
+	}
+	err = k.Migrate(ctx, policyAddr, runAsAddr, p.RegoID, p.EntryPoints)
+	if err != nil {
+		return err
+	}
+
+	ctx.EventManager().EmitEvent(sdk.NewEvent(
+		types.EventTypeGovPolicyResult,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeyRegoID, fmt.Sprintf("%d", p.RegoID)),
+		sdk.NewAttribute(types.AttributeKeyPolicyAddr, policyAddr.String()),
+	))
+	return err
 }

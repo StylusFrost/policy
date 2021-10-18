@@ -16,7 +16,7 @@ type PolicyOpsKeeper interface {
 	// ClearPolicyAdmin sets the admin value on the PolicyInfo to nil, to disable further migrations/ updates.
 	ClearPolicyAdmin(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress) error
 	// Migrate allows to upgrade a policy to a new rego
-	Migrate(ctx sdk.Context, contractAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, msg []byte) error
+	Migrate(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, newRegoID uint64, entry_points []byte) error
 	// Execute executes the policy instance
 	Execute(ctx sdk.Context, policyAddress sdk.AccAddress, caller sdk.AccAddress, entry_point string, input []byte, coins sdk.Coins) ([]byte, error)
 	// Refund coins from the policy instance
@@ -25,7 +25,7 @@ type PolicyOpsKeeper interface {
 
 // ViewKeeper provides read only operations
 type ViewKeeper interface {
-	GetPolicyHistory(ctx types.Context, contractAddr types.AccAddress) []PolicyRegoHistoryEntry
+	GetPolicyHistory(ctx types.Context, policyAddr types.AccAddress) []PolicyRegoHistoryEntry
 	GetRegoInfo(ctx types.Context, regoID uint64) *RegoInfo
 	GetByteRego(ctx types.Context, regoID uint64) ([]byte, error)
 	IterateRegoInfos(ctx types.Context, cb func(uint64, RegoInfo) bool)

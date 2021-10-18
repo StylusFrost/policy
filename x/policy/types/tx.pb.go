@@ -35,7 +35,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type MsgRefundPolicy struct {
 	// Sender is the that actor that signed the messages
 	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
-	// Contract is the address of the smart policy
+	// Policy is the address of the smart policy
 	Policy string `protobuf:"bytes,2,opt,name=policy,proto3" json:"policy,omitempty"`
 	// Refunds coins that are transferred from policy
 	Refunds github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,3,rep,name=refunds,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"refunds"`
@@ -78,7 +78,7 @@ var xxx_messageInfo_MsgRefundPolicy proto.InternalMessageInfo
 type MsgExecutePolicy struct {
 	// Sender is the that actor that signed the messages
 	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
-	// Contract is the address of the smart policy
+	// Policy is the address of the smart policy
 	Policy string `protobuf:"bytes,2,opt,name=policy,proto3" json:"policy,omitempty"`
 	// Valid entry point
 	EntryPoint string `protobuf:"bytes,3,opt,name=entry_point,json=entryPoint,proto3" json:"entry_point,omitempty"`

@@ -16,6 +16,7 @@ type ProposalType string
 const (
 	ProposalTypeStoreRego         ProposalType = "StoreRego"
 	ProposalTypeInstantiatePolicy ProposalType = "InstantiatePolicy"
+	ProposalTypeMigratePolicy     ProposalType = "MigratePolicy"
 )
 
 // DisableAllProposals contains no policy gov types.
@@ -25,6 +26,7 @@ var DisableAllProposals []ProposalType
 var EnableAllProposals = []ProposalType{
 	ProposalTypeStoreRego,
 	ProposalTypeInstantiatePolicy,
+	ProposalTypeMigratePolicy,
 }
 
 // ConvertToProposals maps each key to a ProposalType and returns a typed list.
@@ -48,10 +50,76 @@ func ConvertToProposals(keys []string) ([]ProposalType, error) {
 func init() { // register new content types with the sdk
 	govtypes.RegisterProposalType(string(ProposalTypeStoreRego))
 	govtypes.RegisterProposalType(string(ProposalTypeInstantiatePolicy))
+	govtypes.RegisterProposalType(string(ProposalTypeMigratePolicy))
 
 	govtypes.RegisterProposalTypeCodec(&StoreRegoProposal{}, "policy/StoreRegoProposal")
 	govtypes.RegisterProposalTypeCodec(&InstantiatePolicyProposal{}, "policy/InstantiatePolicyProposal")
+	govtypes.RegisterProposalTypeCodec(&MigratePolicyProposal{}, "policy/MigratePolicyProposal")
 
+}
+
+// ProposalRoute returns the routing key of a parameter change proposal.
+func (p MigratePolicyProposal) ProposalRoute() string { return RouterKey }
+
+// GetTitle returns the title of the proposal
+func (p *MigratePolicyProposal) GetTitle() string { return p.Title }
+
+// GetDescription returns the human readable description of the proposal
+func (p MigratePolicyProposal) GetDescription() string { return p.Description }
+
+// ProposalType returns the type
+func (p MigratePolicyProposal) ProposalType() string { return string(ProposalTypeMigratePolicy) }
+
+// ValidateBasic validates the proposal
+func (p MigratePolicyProposal) ValidateBasic() error {
+	if err := validateProposalCommons(p.Title, p.Description); err != nil {
+		return err
+	}
+	if _, err := sdk.AccAddressFromBech32(p.Policy); err != nil {
+		return sdkerrors.Wrap(err, "policy")
+	}
+	if _, err := sdk.AccAddressFromBech32(p.RunAs); err != nil {
+		return sdkerrors.Wrap(err, "run as")
+	}
+	if p.RegoID == 0 {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "rego id is required")
+	}
+	if !json.Valid(p.EntryPoints) {
+		return sdkerrors.Wrap(ErrInvalid, "entry points json")
+	}
+
+	return nil
+}
+
+// String implements the Stringer interface.
+func (p MigratePolicyProposal) String() string {
+	return fmt.Sprintf(`Migrate Policy Proposal:
+  Title:       %s
+  Description: %s
+  Policy:    %s
+  Rego id:     %d
+  Run as:      %s
+  EntryPoints :     %q
+`, p.Title, p.Description, p.Policy, p.RegoID, p.RunAs, p.EntryPoints)
+}
+
+// MarshalYAML pretty prints the migrate message
+func (p MigratePolicyProposal) MarshalYAML() (interface{}, error) {
+	return struct {
+		Title       string `yaml:"title"`
+		Description string `yaml:"description"`
+		Policy      string `yaml:"policy"`
+		RegoID      uint64 `yaml:"rego_id"`
+		EntryPoints string `yaml:"entry_points"`
+		RunAs       string `yaml:"run_as"`
+	}{
+		Title:       p.Title,
+		Description: p.Description,
+		Policy:      p.Policy,
+		RegoID:      p.RegoID,
+		EntryPoints: string(p.EntryPoints),
+		RunAs:       p.RunAs,
+	}, nil
 }
 
 // ProposalRoute returns the routing key of a parameter change proposal.
@@ -196,7 +264,7 @@ func (p InstantiatePolicyProposal) MarshalYAML() (interface{}, error) {
 		Description string    `yaml:"description"`
 		RunAs       string    `yaml:"run_as"`
 		Admin       string    `yaml:"admin"`
-		RegoID      uint64    `yaml:"code_id"`
+		RegoID      uint64    `yaml:"rego_id"`
 		Label       string    `yaml:"label"`
 		EntryPoints string    `yaml:"entry_points"`
 		Funds       sdk.Coins `yaml:"funds"`

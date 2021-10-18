@@ -31,7 +31,7 @@ message StoreRegoProposal {
 }
 
 // InstantiatePolicyProposal gov proposal content type to instantiate a
-// contract.
+// policy.
 message InstantiatePolicyProposal {
   // Title is a short summary
   string title = 1;
@@ -52,4 +52,20 @@ message InstantiatePolicyProposal {
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
+}
+
+// MigratePolicyProposal gov proposal content type to migrate a policy.
+message MigratePolicyProposal {
+  // Title is a short summary
+  string title = 1;
+  // Description is a human readable text
+  string description = 2;
+  // RunAs is the address that is passed to the policy's environment as sender
+  string run_as = 3;
+  // Policy is the address of the smart policy
+  string policy = 4;
+  // RegoID references the new REGO code
+  uint64 rego_id = 5 [ (gogoproto.customname) = "RegoID" ];
+  // Valid entry points json encoded 
+  bytes entry_points = 6 [ (gogoproto.casttype) = "encoding/json.RawMessage" ];
 }
